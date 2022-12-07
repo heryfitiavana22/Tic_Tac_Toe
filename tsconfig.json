@@ -1,10 +1,20 @@
 {
     "compilerOptions": {
         "outDir": "./dist",
-        "module": "ES6",
+        "noImplicitAny": true,
         "target": "ES5",
         "allowJs": true,
         "moduleResolution": "node",
         "watch": true,
-    }
+        "strict": true,
+        "experimentalDecorators": true,
+        "noEmit": true,
+        "sourceMap": true
+    },
+    "files": [
+        "src/ts/main.ts"
+    ],
+    "include": [
+        "src/types/**/*"
+    ]
 }

@@ -1,14 +1,19 @@
 /*!************************************************************************************************************************!*\
   !*** css ./node_modules/.pnpm/css-loader@6.7.2_webpack@5.75.0/node_modules/css-loader/dist/cjs.js!./src/css/style.css ***!
   \************************************************************************************************************************/
+* {box-sizing: border-box;}
+
 body {
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-direction: column;
     position: fixed;
     width: 100%;
     height: 100%;
     background-color: black;
+    color: rgb(218, 218, 218);
+    font-family: sans-serif;
 }
 
 .container {
@@ -22,6 +27,7 @@ body {
 }
 
 .case {
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -29,12 +35,13 @@ body {
     cursor: pointer;
 }
 
+
 .point {
-    position: relative;
+    position: absolute;
 }
 .point.circle {
-    width: 45%;
-    height: 45%;
+    width: 55%;
+    height: 55%;
     border-radius: 50%;
     border: 7px solid cadetblue;
 }
@@ -48,9 +55,8 @@ body {
     content: "";
     display: block;
     position: absolute;
-    top: 45%;
-    left: -2px;
-    width: 60px;
+    top: 43%;
+    width: 100%;
     height: 7px;
     background-color: cornflowerblue;
 }
@@ -60,10 +66,90 @@ body {
     display: block;
     position: absolute;
     left: 43%;
-    top: 2px;
     width: 7px;
-    height: 60px;
+    height: 100%;
     background-color: cornflowerblue;
+}
+
+.line {
+    display: block;
+    position: absolute;
+    width: 300px;
+    height: 2px;
+    left: 0;
+    background-color: gray;
+    z-index: 11;
+}
+.line.rotate {
+    width: 414px;
+    left: unset;
+    transform: rotate(45deg) translateX(146px); 
+}
+
+.players {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    width: 300px;
+    margin-top: 30px;
+}
+
+.player {
+    width: 50%;
+    text-align: center;
+}
+
+.player .name {
+    display: block;
+    font-size: 20px;
+    margin-bottom: 10px;
+    /* font-weight: bolder; */
+}
+.player .score {font-weight: bold;}
+.player .point {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    display: inline-block;
+}
+
+.result {
+    position: absolute;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 30%;
+    height: 30%;
+    background-color: #1d1d1d;
+    border: 1px solid rgb(78, 78, 78);
+    transition: all 0.3s ease;
+}
+
+.result .winner {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.btn-container button {
+    padding: 2px 10px;
+    color: aliceblue;
+    font-size: 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.btn-container button:nth-child(1) {
+    background-color: gray;
+    border: 1px solid gray;
+}
+.btn-container button:nth-child(2) {
+    background-color: darkolivegreen;
+    border: 1px solid darkolivegreen;
+}
+.btn-container button:hover {
+    color: rgb(220, 229, 236);
+    transform: translate(2px);
 }
 
 

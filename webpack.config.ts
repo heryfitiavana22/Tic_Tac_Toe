@@ -1,8 +1,9 @@
-const path = require("path");
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+import * as path from 'path';
+import * as webpack from 'webpack';
+import * as HtmlWebpackPlugin from 'html-webpack-plugin';
+import * as MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
-module.exports = {
+let config: webpack.Configuration = {
     entry: "./src/ts/main.ts",
     output: {
         path: path.resolve(__dirname, "dist"),
@@ -15,14 +16,22 @@ module.exports = {
         rules: [
             {
                 test: /\.ts$/,
-                use: "ts-loader",
                 exclude: /node_modules/,
+                use: {
+                    loader: 'ts-loader',
+                    options: {
+                        compilerOptions: {
+                            noEmit: false, // this option will solve the issue
+                        },
+                    },
+                },
             },
+            {
+                test : /\.css$/,
+                use : [MiniCssExtractPlugin.loader, 'css-loader']
+            }
         ],
-        rules : [{
-            test : /\.css$/,
-            use : [MiniCssExtractPlugin.loader, 'css-loader']
-        }]
+        
     },
     resolve: {
         extensions: ['.ts', '...' ],
@@ -39,3 +48,5 @@ module.exports = {
         })
     ]
 };
+
+export default config
