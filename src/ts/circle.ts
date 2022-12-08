@@ -13,7 +13,7 @@ class Circle extends Point {
         // console.log(this.adjacentMatrix);
     }
 
-    check(coordsWinner: CoordsWinner[]) {
+    check(dimension: number) {
         // convertir la matrice d'adjacence en string pour faciliter la verification
         // ex : 1,0,0,1,0,0,1,0,0 => 100100100
         let coords = this.adjacentMatrix.toString().split(",").join(""),
@@ -26,18 +26,72 @@ class Circle extends Point {
             // ex : 001010100
             contreDiagonal = /(1|0){2}[1](1|0){1}[1](1|0){1}[1](1|0){2}/;
         console.log(coords);
-        if(col.test(coords)) {
-            console.log("winner circle col"); 
+        if (col.test(coords)) {
+            console.log("winner circle col");
+            // chercher l'indice de depart pour tracer la ligne
+            for (let i = 0; i < dimension; i++) {
+                let colValue = []
+                for (let j = 0; j < dimension; j++) {
+                    colValue.push(this.adjacentMatrix[j][i])
+                }
+                
+                if(colValue.toString() === "1,1,1") {
+                    // i correspond à la colonne
+                    let beginCaseHTML = document.getElementById(`${0};${i}`) as HTMLDivElement
+                    beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line col"></span>')
+                    let line = document.querySelector('.line') as HTMLSpanElement
+                    // animation
+                    setTimeout(() => {
+                        line.style.height = "300px"
+                    }, 10)
+                    return true
+                }
+            }
+            return false
         }
-        if(row.test(coords)) {
+        if (row.test(coords)) {
             console.log("winner circle row");
+            for (let i = 0; i < dimension; i++) {
+                // prendre la ligne en un coup avec this.adjacentMatrix[i]
+                if(this.adjacentMatrix[i].toString() === "1,1,1") {
+                    // i correspond à la ligne
+                    let beginCaseHTML = document.getElementById(`${i};${0}`) as HTMLDivElement
+                    beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line row"></span>')
+                    let line = document.querySelector('.line') as HTMLSpanElement
+                    // animation
+                    setTimeout(() => {
+                        line.style.width = "300px"
+                    }, 10)
+                    return true
+                }
+            }
+            return false
         }
-        if(diagonal.test(coords)) {
+        if (diagonal.test(coords)) {
             console.log("winner circle diagonal");
+            // depart 0;0
+            let beginCaseHTML = document.getElementById(`0;0`) as HTMLDivElement
+            beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line rotate"></span>')
+            let line = document.querySelector('.line') as HTMLSpanElement
+            // animation
+            setTimeout(() => {
+                line.style.width = "414px"
+            }, 10)
+            return true
         }
-        if(contreDiagonal.test(coords)) {
+        if (contreDiagonal.test(coords)) {
             console.log("winner circle contrediagonal");
+            // 0;2
+            let beginCaseHTML = document.getElementById(`0;2`) as HTMLDivElement
+            beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line rotate contre"></span>')
+            let line = document.querySelector('.line') as HTMLSpanElement
+            // animation
+            setTimeout(() => {
+                line.style.width = "414px"
+            }, 10)
+            return true
         }
+        return false
     }
 }
 

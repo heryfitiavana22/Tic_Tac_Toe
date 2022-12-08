@@ -13,7 +13,7 @@ class Croix extends Point {
         // this.adjacentMatrix[x][y] = 1
     }
 
-    check(coordsWinner: CoordsWinner[]) {
+    check(dimension: number) {
         
         let coords = this.adjacentMatrix.toString()
         // console.log(coords);
@@ -22,6 +22,7 @@ class Croix extends Point {
             console.log("winner croix");
             
         }
+        return false
     }
 }
 

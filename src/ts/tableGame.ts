@@ -1,10 +1,11 @@
 class TableGame {
     currentPlayer = 1;
+    isWinning = false;
     // dimension
     x: number;
     y: number;
     // currentPoint: Point = circle;
-    private _currentPointHTML = '<span class="point circle"></span';
+    private _currentPointHTML = '<span class="point circle"></span>';
 
     constructor(x: number, y: number) {
         this.x = x;
@@ -35,7 +36,7 @@ class TableGame {
                 '<span class="point croix"></span>');
         }
 
-        this._currentPointHTML = '<span class="point circle"></span';
+        this._currentPointHTML = '<span class="point circle"></span>';
     }
 
     getCoordsWinner(): CoordsWinner[] {
@@ -67,9 +68,9 @@ class TableGame {
         return coordsWinner;
     }
 
-    checkWinner(currentPoint: Point, coordsWinner: CoordsWinner[], x: number, y: number) {
+    checkWinner(currentPoint: Point, x: number, y: number) {
         currentPoint.pushCoords(x, y);
-        currentPoint.check(coordsWinner);
+        this.isWinning = currentPoint.check(this.x);
     }
 }
 

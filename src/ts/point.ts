@@ -6,7 +6,7 @@ abstract class Point {
     }
     abstract createAdjacentMatrix(x: number, y: number): void
     abstract pushCoords(x: number, y: number): void
-    abstract check(coordsWinner: CoordsWinner[]): void
+    abstract check(dimension: number): boolean
 }
 
 export default Point;

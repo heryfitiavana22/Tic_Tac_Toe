@@ -6,7 +6,7 @@ declare class Point {
     // adjacent matrix
     adjacentMatrix: AdjacentMatrix;
     pushCoords: (x: number, y: number) => void;
-    check: (coordsWinner: CoordsWinner[]) => void;
+    check: (dimension: number) => boolean;
     createAdjacentMatrix(x: number, y: number): void;
 }
 

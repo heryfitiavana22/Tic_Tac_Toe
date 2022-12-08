@@ -53,7 +53,7 @@ var Circle = /** @class */ (function (_super) {
         this.adjacentMatrix[x][y] = 1;
         // console.log(this.adjacentMatrix);
     };
-    Circle.prototype.check = function (coordsWinner) {
+    Circle.prototype.check = function (dimension) {
         // convertir la matrice d'adjacence en string pour faciliter la verification
         // ex : 1,0,0,1,0,0,1,0,0 => 100100100
         var coords = this.adjacentMatrix.toString().split(",").join(""), 
@@ -68,16 +68,81 @@ var Circle = /** @class */ (function (_super) {
         console.log(coords);
         if (col.test(coords)) {
             console.log("winner circle col");
+            var _loop_1 = function (i) {
+                var colValue = [];
+                for (var j = 0; j < dimension; j++) {
+                    colValue.push(this_1.adjacentMatrix[j][i]);
+                }
+                if (colValue.toString() === "1,1,1") {
+                    // i correspond à la colonne
+                    var beginCaseHTML = document.getElementById("".concat(0, ";").concat(i));
+                    beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line col"></span>');
+                    var line_1 = document.querySelector('.line');
+                    // animation
+                    setTimeout(function () {
+                        line_1.style.height = "300px";
+                    }, 10);
+                    return { value: true };
+                }
+            };
+            var this_1 = this;
+            // chercher l'indice de depart pour tracer la ligne
+            for (var i = 0; i < dimension; i++) {
+                var state_1 = _loop_1(i);
+                if (typeof state_1 === "object")
+                    return state_1.value;
+            }
+            return false;
         }
         if (row.test(coords)) {
             console.log("winner circle row");
+            var _loop_2 = function (i) {
+                // prendre la ligne en un coup avec this.adjacentMatrix[i]
+                if (this_2.adjacentMatrix[i].toString() === "1,1,1") {
+                    // i correspond à la ligne
+                    var beginCaseHTML = document.getElementById("".concat(i, ";").concat(0));
+                    beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line row"></span>');
+                    var line_2 = document.querySelector('.line');
+                    // animation
+                    setTimeout(function () {
+                        line_2.style.width = "300px";
+                    }, 10);
+                    return { value: true };
+                }
+            };
+            var this_2 = this;
+            for (var i = 0; i < dimension; i++) {
+                var state_2 = _loop_2(i);
+                if (typeof state_2 === "object")
+                    return state_2.value;
+            }
+            return false;
         }
         if (diagonal.test(coords)) {
             console.log("winner circle diagonal");
+            // depart 0;0
+            var beginCaseHTML = document.getElementById("0;0");
+            beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line rotate"></span>');
+            var line_3 = document.querySelector('.line');
+            // animation
+            setTimeout(function () {
+                line_3.style.width = "414px";
+            }, 10);
+            return true;
         }
         if (contreDiagonal.test(coords)) {
             console.log("winner circle contrediagonal");
+            // 0;2
+            var beginCaseHTML = document.getElementById("0;2");
+            beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line rotate contre"></span>');
+            var line_4 = document.querySelector('.line');
+            // animation
+            setTimeout(function () {
+                line_4.style.width = "414px";
+            }, 10);
+            return true;
         }
+        return false;
     };
     return Circle;
 }(point_1.default));
@@ -134,12 +199,13 @@ var Croix = /** @class */ (function (_super) {
     Croix.prototype.pushCoords = function (x, y) {
         // this.adjacentMatrix[x][y] = 1
     };
-    Croix.prototype.check = function (coordsWinner) {
+    Croix.prototype.check = function (dimension) {
         var coords = this.adjacentMatrix.toString();
         // console.log(coords);
         if (coords.includes("1,1,1")) {
             console.log("winner croix");
         }
+        return false;
     };
     return Croix;
 }(point_1.default));
@@ -183,8 +249,9 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var TableGame = /** @class */ (function () {
     function TableGame(x, y) {
         this.currentPlayer = 1;
+        this.isWinning = false;
         // currentPoint: Point = circle;
-        this._currentPointHTML = '<span class="point circle"></span';
+        this._currentPointHTML = '<span class="point circle"></span>';
         this.x = x;
         this.y = y;
     }
@@ -210,7 +277,7 @@ var TableGame = /** @class */ (function () {
             return (this._currentPointHTML =
                 '<span class="point croix"></span>');
         }
-        this._currentPointHTML = '<span class="point circle"></span';
+        this._currentPointHTML = '<span class="point circle"></span>';
     };
     TableGame.prototype.getCoordsWinner = function () {
         // sequence des coordonnée gagnant
@@ -236,9 +303,9 @@ var TableGame = /** @class */ (function () {
         coordsWinner.push([contreDiagonal]);
         return coordsWinner;
     };
-    TableGame.prototype.checkWinner = function (currentPoint, coordsWinner, x, y) {
+    TableGame.prototype.checkWinner = function (currentPoint, x, y) {
         currentPoint.pushCoords(x, y);
-        currentPoint.check(coordsWinner);
+        this.isWinning = currentPoint.check(this.x);
     };
     return TableGame;
 }());
@@ -306,27 +373,29 @@ __webpack_require__(/*! ../css/style.css */ "./src/css/style.css");
 var tableGame_1 = __webpack_require__(/*! ./tableGame */ "./src/ts/tableGame.ts");
 var circle_1 = __webpack_require__(/*! ./circle */ "./src/ts/circle.ts");
 var croix_1 = __webpack_require__(/*! ./croix */ "./src/ts/croix.ts");
-var tableGame = new tableGame_1.default(3, 3);
-// tableGame.drawTable();
-var coordsWinner = tableGame.getCoordsWinner();
-var circle = new circle_1.default(0, 0), croix = new croix_1.default(0, 0);
+var tableGame = new tableGame_1.default(3, 3), circle = new circle_1.default(0, 0), croix = new croix_1.default(0, 0);
+tableGame.drawTable();
 circle.createAdjacentMatrix(3, 3);
 croix.createAdjacentMatrix(3, 3);
-var container = document.querySelector(".container");
+var container = document.querySelector(".container"), currentPlayerHTML = document.querySelector(".current-player");
 container.onclick = function (e) {
     var target = e.target, coords = target.id.split(";"), x = Number(coords[0]), y = Number(coords[1]);
     // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
-    if (coords.length !== 2)
+    if (target.innerHTML.length > 0 ||
+        coords.length !== 2 ||
+        tableGame.isWinning)
         return;
     tableGame.drawPoint(target);
     // check winner and change currentPlayer
     if (tableGame.currentPlayer === 1) {
-        tableGame.checkWinner(circle, coordsWinner, x, y);
+        tableGame.checkWinner(circle, x, y);
         tableGame.currentPlayer = 2;
+        currentPlayerHTML.innerHTML = '<span class="point croix"></span>';
     }
     else {
-        tableGame.checkWinner(croix, coordsWinner, x, y);
+        tableGame.checkWinner(croix, x, y);
         tableGame.currentPlayer = 1;
+        currentPlayerHTML.innerHTML = '<span class="point circle"></span>';
     }
 };
 
