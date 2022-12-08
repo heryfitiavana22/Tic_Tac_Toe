@@ -133,7 +133,7 @@ body {
 
 .result {
     position: absolute;
-    display: none;
+    display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
@@ -141,7 +141,9 @@ body {
     height: 30%;
     background-color: #1d1d1d;
     border: 1px solid rgb(78, 78, 78);
+    transform: scale(0);
     transition: all 0.3s ease;
+    z-index: 55;
 }
 
 .result .winner {

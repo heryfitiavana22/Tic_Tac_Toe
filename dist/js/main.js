@@ -14,209 +14,6 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
-/***/ "./src/ts/circle.ts":
-/*!**************************!*\
-  !*** ./src/ts/circle.ts ***!
-  \**************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-var point_1 = __webpack_require__(/*! ./point */ "./src/ts/point.ts");
-var Circle = /** @class */ (function (_super) {
-    __extends(Circle, _super);
-    function Circle() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Circle.prototype.createAdjacentMatrix = function (x, y) {
-        for (var i = 0; i < x; i++) {
-            this.adjacentMatrix.push([0, 0, 0]);
-        }
-        // console.log(this.adjacentMatrix);
-    };
-    Circle.prototype.pushCoords = function (x, y) {
-        this.adjacentMatrix[x][y] = 1;
-        // console.log(this.adjacentMatrix);
-    };
-    Circle.prototype.check = function (dimension) {
-        // convertir la matrice d'adjacence en string pour faciliter la verification
-        // ex : 1,0,0,1,0,0,1,0,0 => 100100100
-        var coords = this.adjacentMatrix.toString().split(",").join(""), 
-        // ex : 100100100, 010010010, 001001001
-        col = /(1|0){0,2}[1](1|0){2}[1](1|0){2}[1](1|0){0,2}/, 
-        // ex : 111000000, 000111000, 000000111
-        row = /([1]{3}(1|0){6})|((1|0){3}[1]{3}(1|0){3})|((1|0){6}[1]{3})/, 
-        // ex : 100010001
-        diagonal = /[1](1|0){3}[1](1|0){3}[1]/, 
-        // ex : 001010100
-        contreDiagonal = /(1|0){2}[1](1|0){1}[1](1|0){1}[1](1|0){2}/;
-        console.log(coords);
-        if (col.test(coords)) {
-            console.log("winner circle col");
-            var _loop_1 = function (i) {
-                var colValue = [];
-                for (var j = 0; j < dimension; j++) {
-                    colValue.push(this_1.adjacentMatrix[j][i]);
-                }
-                if (colValue.toString() === "1,1,1") {
-                    // i correspond à la colonne
-                    var beginCaseHTML = document.getElementById("".concat(0, ";").concat(i));
-                    beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line col"></span>');
-                    var line_1 = document.querySelector('.line');
-                    // animation
-                    setTimeout(function () {
-                        line_1.style.height = "300px";
-                    }, 10);
-                    return { value: true };
-                }
-            };
-            var this_1 = this;
-            // chercher l'indice de depart pour tracer la ligne
-            for (var i = 0; i < dimension; i++) {
-                var state_1 = _loop_1(i);
-                if (typeof state_1 === "object")
-                    return state_1.value;
-            }
-            return false;
-        }
-        if (row.test(coords)) {
-            console.log("winner circle row");
-            var _loop_2 = function (i) {
-                // prendre la ligne en un coup avec this.adjacentMatrix[i]
-                if (this_2.adjacentMatrix[i].toString() === "1,1,1") {
-                    // i correspond à la ligne
-                    var beginCaseHTML = document.getElementById("".concat(i, ";").concat(0));
-                    beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line row"></span>');
-                    var line_2 = document.querySelector('.line');
-                    // animation
-                    setTimeout(function () {
-                        line_2.style.width = "300px";
-                    }, 10);
-                    return { value: true };
-                }
-            };
-            var this_2 = this;
-            for (var i = 0; i < dimension; i++) {
-                var state_2 = _loop_2(i);
-                if (typeof state_2 === "object")
-                    return state_2.value;
-            }
-            return false;
-        }
-        if (diagonal.test(coords)) {
-            console.log("winner circle diagonal");
-            // depart 0;0
-            var beginCaseHTML = document.getElementById("0;0");
-            beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line rotate"></span>');
-            var line_3 = document.querySelector('.line');
-            // animation
-            setTimeout(function () {
-                line_3.style.width = "414px";
-            }, 10);
-            return true;
-        }
-        if (contreDiagonal.test(coords)) {
-            console.log("winner circle contrediagonal");
-            // 0;2
-            var beginCaseHTML = document.getElementById("0;2");
-            beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line rotate contre"></span>');
-            var line_4 = document.querySelector('.line');
-            // animation
-            setTimeout(function () {
-                line_4.style.width = "414px";
-            }, 10);
-            return true;
-        }
-        return false;
-    };
-    return Circle;
-}(point_1.default));
-exports["default"] = Circle;
-
-
-/***/ }),
-
-/***/ "./src/ts/croix.ts":
-/*!*************************!*\
-  !*** ./src/ts/croix.ts ***!
-  \*************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
-
-
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-var point_1 = __webpack_require__(/*! ./point */ "./src/ts/point.ts");
-var Croix = /** @class */ (function (_super) {
-    __extends(Croix, _super);
-    function Croix() {
-        return _super !== null && _super.apply(this, arguments) || this;
-    }
-    Croix.prototype.createAdjacentMatrix = function (x, y) {
-        for (var i = 0; i < x; i++) {
-            for (var j = 0; j < y; j++) {
-                this.adjacentMatrix.push([0, 0, 0]);
-            }
-        }
-    };
-    Croix.prototype.pushCoords = function (x, y) {
-        // this.adjacentMatrix[x][y] = 1
-    };
-    Croix.prototype.check = function (dimension) {
-        var coords = this.adjacentMatrix.toString();
-        // console.log(coords);
-        if (coords.includes("1,1,1")) {
-            console.log("winner croix");
-        }
-        return false;
-    };
-    return Croix;
-}(point_1.default));
-function push(U, V) {
-    return U.length === 0 ? __spreadArray([], V, true) : __spreadArray(__spreadArray([], U, true), V, true);
-}
-exports["default"] = Croix;
-
-
-/***/ }),
-
 /***/ "./src/ts/point.ts":
 /*!*************************!*\
   !*** ./src/ts/point.ts ***!
@@ -226,11 +23,20 @@ exports["default"] = Croix;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var Point = /** @class */ (function () {
-    function Point(x, y) {
-        // list coordinate
-        this.adjacentMatrix = [];
-        // this.adjacentMatrix[x][y] = 1
+    function Point(name, p) {
+        this.score = 0;
+        this.namePlayer = name;
+        this.pointHTML = p;
+        this.scoreHTML = document.querySelector(".".concat(this.namePlayer, " .score"));
     }
+    Point.prototype.init = function () {
+        this.score = 0;
+        this.scoreHTML.innerHTML = this.score.toString();
+    };
+    Point.prototype.win = function () {
+        this.score++;
+        this.scoreHTML.innerHTML = this.score.toString();
+    };
     return Point;
 }());
 exports["default"] = Point;
@@ -251,61 +57,183 @@ var TableGame = /** @class */ (function () {
         this.currentPlayer = 1;
         this.isWinning = false;
         // currentPoint: Point = circle;
-        this._currentPointHTML = '<span class="point circle"></span>';
-        this.x = x;
-        this.y = y;
+        this.currentPointHTML = '<span class="point circle"></span>';
+        // matrice d'adjacence qui represente le table (1 => player1; 2 => player2; 0 => case vide)
+        this._adjacentMatrix = [];
+        this.dimensionX = x;
+        this.dimensionY = y;
     }
+    TableGame.prototype.init = function () {
+        this.isWinning = false;
+        this._adjacentMatrix = [];
+        this.createAdjacentMatrix();
+        this.drawTable();
+    };
     TableGame.prototype.drawTable = function () {
         var casesHTML = "";
-        for (var i = 0; i < this.x; i++) {
-            for (var j = 0; j < this.y; j++) {
+        for (var i = 0; i < this.dimensionX; i++) {
+            for (var j = 0; j < this.dimensionY; j++) {
                 casesHTML += "<div class=\"case\" id=\"".concat(i, ";").concat(j, "\"></div>");
             }
         }
         document.querySelector(".container").innerHTML =
             casesHTML;
     };
+    TableGame.prototype.createAdjacentMatrix = function () {
+        for (var i = 0; i < this.dimensionX; i++) {
+            this._adjacentMatrix.push([0, 0, 0]);
+        }
+    };
+    TableGame.prototype.pushCoords = function (x, y) {
+        this._adjacentMatrix[x][y] = this.currentPlayer;
+        // console.log(this.adjacentMatrix);
+    };
     TableGame.prototype.drawPoint = function (caseHTML) {
-        // if there is a point
-        if (caseHTML.innerHTML.length > 0)
-            return;
-        caseHTML.innerHTML = this._currentPointHTML;
+        caseHTML.innerHTML = this.currentPointHTML;
         caseHTML.style.cursor = "not-allowed";
-        // player 1 : circle; player 2: croix
-        // change currentPointHTML , currentPlayer and currentPoint
-        if (this.currentPlayer === 1) {
-            return (this._currentPointHTML =
-                '<span class="point croix"></span>');
-        }
-        this._currentPointHTML = '<span class="point circle"></span>';
     };
-    TableGame.prototype.getCoordsWinner = function () {
-        // sequence des coordonnée gagnant
-        var coordsWinner = [];
-        var diagonal = [];
-        for (var i = 1; i <= this.x; i++) {
-            var col = [], row = [];
-            for (var j = 1; j <= this.y; j++) {
-                col.push([i, j]);
-                row.push([j, i]);
+    TableGame.prototype.showResult = function (isDraw) {
+        var resultHTML = document.querySelector(".result");
+        resultHTML.innerHTML = "\n            <div class=\"winner\">".concat(isDraw ? "DRAW !!" : "PLAYER ".concat(this.currentPlayer, " WON !"), "</div>\n            <div class=\"btn-container\">\n                <button class=\"reset\">Reset</button>\n                <button class=\"continue\">Continue</button>\n            </div>");
+        // attendre pour afficher un peu la ligne
+        setTimeout(function () {
+            resultHTML.style.transform = "scale(1)";
+        }, 500);
+    };
+    TableGame.prototype.checkWinner = function () {
+        var p = this.currentPlayer;
+        // convertir la matrice d'adjacence en string pour faciliter la verification
+        // ex : 1,0,0,1,0,0,1,0,0 => 100100100
+        var coords = this._adjacentMatrix.toString().split(",").join(""), 
+        // ex : 100100100, 010010010, 001001001 (1 => player1; 2 => player2; 0 => case vide)
+        col = new RegExp("(2|1|0){0,2}[".concat(p, "](2|1|0){2}[").concat(p, "](2|1|0){2}[").concat(p, "](2|1|0){0,2}")), 
+        // ex : 111000000, 000111000, 000000111 (1 => player1; 2 => player2; 0 => case vide)
+        row = new RegExp("([".concat(p, "]{3}(2|1|0){6})|((2|1|0){3}[").concat(p, "]{3}(2|1|0){3})|((2|1|0){6}[").concat(p, "]{3})")), 
+        // ex : 100010001 (1 => player1; 2 => player2; 0 => case vide)
+        diagonal = new RegExp("[".concat(p, "](2|1|0){3}[").concat(p, "](2|1|0){3}[").concat(p, "]")), 
+        // ex : 001010100 (1 => player1; 2 => player2; 0 => case vide)
+        contreDiagonal = new RegExp("(2|1|0){2}[".concat(p, "](2|1|0){1}[").concat(p, "](2|1|0){1}[").concat(p, "](2|1|0){2}"));
+        console.log(coords);
+        if (col.test(coords)) {
+            console.log("winner circle col" + p);
+            var _loop_1 = function (i) {
+                var colValue = [], 
+                // 1,1,1 ou 2,2,2
+                sequence = this_1.currentPlayer
+                    .toString()
+                    .repeat(3)
+                    .split("")
+                    .join(",");
+                for (var j = 0; j < this_1.dimensionX; j++) {
+                    colValue.push(this_1._adjacentMatrix[j][i]);
+                }
+                if (colValue.toString() === sequence) {
+                    // i correspond à la colonne
+                    var beginCaseHTML = document.getElementById("".concat(0, ";").concat(i));
+                    beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line col"></span>');
+                    var line_1 = document.querySelector(".line");
+                    // animation
+                    setTimeout(function () {
+                        line_1.style.height = "300px";
+                    }, 10);
+                    // display result
+                    this_1.showResult(false);
+                    return { value: true };
+                }
+            };
+            var this_1 = this;
+            // chercher l'indice de depart pour tracer la ligne
+            for (var i = 0; i < this.dimensionX; i++) {
+                var state_1 = _loop_1(i);
+                if (typeof state_1 === "object")
+                    return state_1.value;
             }
-            coordsWinner.push([col]);
-            coordsWinner.push([row]);
-            diagonal.push([i, i]);
+            return false;
         }
-        coordsWinner.push([diagonal]);
-        // contre diagonal
-        var contreDiagonal = [
-            [3, 1],
-            [2, 2],
-            [1, 3],
-        ];
-        coordsWinner.push([contreDiagonal]);
-        return coordsWinner;
+        if (row.test(coords)) {
+            console.log("winner circle row" + p);
+            var _loop_2 = function (i) {
+                // 1,1,1 ou 2,2,2
+                var sequence = this_2.currentPlayer
+                    .toString()
+                    .repeat(3)
+                    .split("")
+                    .join(",");
+                // prendre la ligne en un coup avec this.adjacentMatrix[i]
+                if (this_2._adjacentMatrix[i].toString() === sequence) {
+                    // i correspond à la ligne
+                    var beginCaseHTML = document.getElementById("".concat(i, ";").concat(0));
+                    beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line row"></span>');
+                    var line_2 = document.querySelector(".line");
+                    // animation
+                    setTimeout(function () {
+                        line_2.style.width = "300px";
+                    }, 10);
+                    // display result
+                    this_2.showResult(false);
+                    return { value: true };
+                }
+            };
+            var this_2 = this;
+            for (var i = 0; i < this.dimensionX; i++) {
+                var state_2 = _loop_2(i);
+                if (typeof state_2 === "object")
+                    return state_2.value;
+            }
+            return false;
+        }
+        if (diagonal.test(coords)) {
+            console.log("winner circle diagonal" + p);
+            // depart 0;0
+            var beginCaseHTML = document.getElementById("0;0");
+            beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line rotate"></span>');
+            var line_3 = document.querySelector(".line");
+            // animation
+            setTimeout(function () {
+                line_3.style.width = "414px";
+            }, 10);
+            // display result
+            this.showResult(false);
+            return true;
+        }
+        if (contreDiagonal.test(coords)) {
+            console.log("winner circle contrediagonal" + p);
+            // 0;2
+            var beginCaseHTML = document.getElementById("0;2");
+            beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line rotate contre"></span>');
+            var line_4 = document.querySelector(".line");
+            // animation
+            setTimeout(function () {
+                line_4.style.width = "414px";
+            }, 10);
+            // display result
+            this.showResult(false);
+            return true;
+        }
+        // au cas où il n'y a plus de case vide mais pas de vainquer
+        if (!coords.includes("0")) {
+            console.log("draw");
+            // display result
+            this.showResult(true);
+            return true;
+        }
+        return false;
     };
-    TableGame.prototype.checkWinner = function (currentPoint, x, y) {
-        currentPoint.pushCoords(x, y);
-        this.isWinning = currentPoint.check(this.x);
+    TableGame.prototype.reset = function (circle, croix) {
+        this.init();
+        this.currentPlayer = 1;
+        this.currentPointHTML = '<span class="point circle"></span>';
+        circle.init();
+        croix.init();
+        var resultHTML = document.querySelector(".result");
+        resultHTML.style.transform = "scale(0)";
+        resultHTML.innerHTML = "";
+    };
+    TableGame.prototype.continue = function () {
+        this.init();
+        var resultHTML = document.querySelector(".result");
+        resultHTML.style.transform = "scale(0)";
+        resultHTML.innerHTML = "";
     };
     return TableGame;
 }());
@@ -341,7 +269,7 @@ exports["default"] = TableGame;
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
@@ -371,33 +299,57 @@ var exports = __webpack_exports__;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 __webpack_require__(/*! ../css/style.css */ "./src/css/style.css");
 var tableGame_1 = __webpack_require__(/*! ./tableGame */ "./src/ts/tableGame.ts");
-var circle_1 = __webpack_require__(/*! ./circle */ "./src/ts/circle.ts");
-var croix_1 = __webpack_require__(/*! ./croix */ "./src/ts/croix.ts");
-var tableGame = new tableGame_1.default(3, 3), circle = new circle_1.default(0, 0), croix = new croix_1.default(0, 0);
-tableGame.drawTable();
-circle.createAdjacentMatrix(3, 3);
-croix.createAdjacentMatrix(3, 3);
-var container = document.querySelector(".container"), currentPlayerHTML = document.querySelector(".current-player");
-container.onclick = function (e) {
-    var target = e.target, coords = target.id.split(";"), x = Number(coords[0]), y = Number(coords[1]);
-    // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
-    if (target.innerHTML.length > 0 ||
-        coords.length !== 2 ||
-        tableGame.isWinning)
-        return;
-    tableGame.drawPoint(target);
-    // check winner and change currentPlayer
-    if (tableGame.currentPlayer === 1) {
-        tableGame.checkWinner(circle, x, y);
-        tableGame.currentPlayer = 2;
-        currentPlayerHTML.innerHTML = '<span class="point croix"></span>';
+var point_1 = __webpack_require__(/*! ./point */ "./src/ts/point.ts");
+(function () {
+    var tableGame = new tableGame_1.default(3, 3), circle = new point_1.default('player1', '<span class="point circle"></span>'), croix = new point_1.default('player2', '<span class="point croix"></span>');
+    var container = document.querySelector(".container"), currentPlayerHTML = document.querySelector(".current-player");
+    tableGame.init();
+    container.onclick = function (e) {
+        var target = e.target, coords = target.id.split(";"), x = Number(coords[0]), y = Number(coords[1]);
+        // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
+        if (target.innerHTML.length > 0 ||
+            coords.length !== 2 ||
+            tableGame.isWinning)
+            return;
+        tableGame.drawPoint(target);
+        tableGame.pushCoords(x, y);
+        tableGame.isWinning = tableGame.checkWinner();
+        // player 1 : circle; player 2: croix
+        // change currentPlayer and currentPointHTML
+        if (tableGame.currentPlayer === 1) {
+            // tableGame.checkWinner(circle, x, y);
+            tableGame.currentPlayer = 2;
+            tableGame.currentPointHTML = croix.pointHTML;
+            currentPlayerHTML.innerHTML = croix.pointHTML;
+            // si gagnant
+            if (tableGame.isWinning) {
+                circle.win();
+                btnResult();
+            }
+        }
+        else {
+            // tableGame.checkWinner(croix, x, y);
+            tableGame.currentPlayer = 1;
+            tableGame.currentPointHTML = circle.pointHTML;
+            currentPlayerHTML.innerHTML = circle.pointHTML;
+            // si gagnant
+            if (tableGame.isWinning) {
+                croix.win();
+                btnResult();
+            }
+        }
+    };
+    function btnResult() {
+        var btnReset = document.querySelector("button.reset"), btnContinue = document.querySelector("button.continue");
+        btnReset.onclick = function () {
+            tableGame.reset(circle, croix);
+            currentPlayerHTML.innerHTML = circle.pointHTML;
+        };
+        btnContinue.onclick = function () {
+            tableGame.continue();
+        };
     }
-    else {
-        tableGame.checkWinner(croix, x, y);
-        tableGame.currentPlayer = 1;
-        currentPlayerHTML.innerHTML = '<span class="point circle"></span>';
-    }
-};
+})();
 
 })();
 

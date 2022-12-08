@@ -1,12 +1,22 @@
-abstract class Point {
-    // list coordinate
-    adjacentMatrix: AdjacentMatrix = []
-    constructor(x: number, y: number) {
-        // this.adjacentMatrix[x][y] = 1
+class Point {
+    score = 0;
+    scoreHTML: HTMLElement;
+    pointHTML: string;
+    namePlayer: string;
+    constructor(name: string, p: string) {
+        this.namePlayer = name
+        this.pointHTML = p
+        this.scoreHTML = document.querySelector(`.${this.namePlayer} .score`) as HTMLSpanElement
     }
-    abstract createAdjacentMatrix(x: number, y: number): void
-    abstract pushCoords(x: number, y: number): void
-    abstract check(dimension: number): boolean
+    init() {
+        this.score = 0
+        this.scoreHTML.innerHTML = this.score.toString()
+    }
+
+    win() {
+        this.score++;
+        this.scoreHTML.innerHTML = this.score.toString()
+    }
 }
 
 export default Point;

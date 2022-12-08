@@ -3,26 +3,17 @@ declare type CoordsWinner = [Coordinate[]];
 declare type AdjacentMatrix = [...number[]][];
 
 declare class Point {
-    // adjacent matrix
-    adjacentMatrix: AdjacentMatrix;
-    pushCoords: (x: number, y: number) => void;
-    check: (dimension: number) => boolean;
-    createAdjacentMatrix(x: number, y: number): void;
+    score: number;
+    scoreHTML: HTMLElement;
+    pointHTML: string;
+    namePlayer: string;
+    init(): void
+    win(): void
 }
 
-// declare class Circle extends Point {
-
+// declare class TableGame {
+//     currentPlayer: number;
+//     dimensionX: number;
+//     dimensionY: number;
+//     private _currentPointHTML: string;
 // }
-
-// declare class Cr extends Point {
-//     pushCoords: (x: number, y: number) => void
-//     check: (coordsWinner: CoordsWinner[]) => void
-// }
-
-declare class TableGame {
-    currentPlayer: number;
-    x: number;
-    y: number;
-    private _currentPointHTML: string;
-    getCoordsWinner(): Coordinate[];
-}
