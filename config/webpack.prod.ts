@@ -15,8 +15,8 @@ let configProd: Configuration = {
     plugins: [
         new HtmlWebpackPlugin({
             template: 'src/template/index.html',
-            filename: 'index.html',
-            publicPath: '/dist/',
+            filename: 'index.ejs',
+            publicPath: '/',
             inject: 'body'
         }),
         new MiniCssExtractPlugin({
