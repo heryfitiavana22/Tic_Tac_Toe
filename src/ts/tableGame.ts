@@ -6,8 +6,11 @@ class TableGame {
     dimensionY: number;
     // currentPoint: Point = circle;
     currentPointHTML = '<span class="point circle"></span>';
+    currentPlayerHTML = document.querySelector(
+        ".current-player"
+    ) as HTMLElement;
     // matrice d'adjacence qui represente le table (1 => player1; 2 => player2; 0 => case vide)
-    private _adjacentMatrix: AdjacentMatrix = [];
+    _adjacentMatrix: AdjacentMatrix = [];
 
     constructor(x: number, y: number) {
         this.dimensionX = x;
@@ -15,10 +18,10 @@ class TableGame {
     }
 
     init() {
-        this.isWinning = false
-        this._adjacentMatrix = []
-        this.createAdjacentMatrix()
-        this.drawTable()
+        this.isWinning = false;
+        this._adjacentMatrix = [];
+        this.createAdjacentMatrix();
+        this.drawTable();
     }
 
     drawTable() {
@@ -43,7 +46,8 @@ class TableGame {
         // console.log(this.adjacentMatrix);
     }
 
-    drawPoint(caseHTML: HTMLDivElement) {
+    drawPoint(x: number, y: number) {
+        let caseHTML = document.getElementById(`${x};${y}`) as HTMLDivElement;
         caseHTML.innerHTML = this.currentPointHTML;
         caseHTML.style.cursor = "not-allowed";
     }
@@ -205,21 +209,62 @@ class TableGame {
     }
 
     reset(circle: Point, croix: Point) {
-        this.init()
+        this.init();
         this.currentPlayer = 1;
         this.currentPointHTML = '<span class="point circle"></span>';
-        circle.init()
-        croix.init()
+        circle.init();
+        croix.init();
         let resultHTML = document.querySelector(".result") as HTMLDivElement;
         resultHTML.style.transform = "scale(0)";
         resultHTML.innerHTML = "";
     }
 
     continue() {
-        this.init()
+        this.init();
         let resultHTML = document.querySelector(".result") as HTMLDivElement;
-        resultHTML.style.transform = "scale(0)"
-        resultHTML.innerHTML = ""
+        resultHTML.style.transform = "scale(0)";
+        resultHTML.innerHTML = "";
+    }
+
+    permutation(circle: Point, croix: Point) {
+        // player 1 : circle; player 2: croix
+        // change currentPlayer and currentPointHTML
+        if (this.currentPlayer === 1) {
+            this.currentPlayer = 2;
+            this.currentPointHTML = croix.pointHTML;
+            this.currentPlayerHTML.innerHTML = croix.pointHTML;
+            // si gagnant
+            if (this.isWinning) {
+                circle.win();
+                this.btnResult(circle, croix);
+            }
+        } else {
+            this.currentPlayer = 1;
+            this.currentPointHTML = circle.pointHTML;
+            this.currentPlayerHTML.innerHTML = circle.pointHTML;
+            // si gagnant
+            if (this.isWinning) {
+                croix.win();
+                this.btnResult(circle, croix);
+            }
+        }
+    }
+
+    btnResult(circle: Point, croix: Point) {
+        let btnReset = document.querySelector(
+                "button.reset"
+            ) as HTMLButtonElement,
+            btnContinue = document.querySelector(
+                "button.continue"
+            ) as HTMLButtonElement;
+
+        btnReset.onclick = () => {
+            this.reset(circle, croix);
+            this.currentPlayerHTML.innerHTML = circle.pointHTML;
+        };
+        btnContinue.onclick = () => {
+            this.continue();
+        };
     }
 }
 
