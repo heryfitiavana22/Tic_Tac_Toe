@@ -1,17 +1,25 @@
 import { io } from "socket.io-client";
+import {showAvailableOpponent} from "./func"
 
 class Socket {
     isActive = false;
     isSocket = false;
     place = ""; // (home ou away)
+    myName = "herydj";
     _currentRoom = "";
     _socket = io();
 
-    init() {
+
+
+    init(tableGame: TableGame, circle: Point, croix: Point, socket: any) {
         this.emitStartGame();
         this.onReady();
         this.waitingForOpponent();
         this.toActive();
+        this.setCurrentPoint(circle, croix);
+        this.onDrawPoint(tableGame, circle, croix, socket)
+        this.onReset(tableGame, circle, croix)
+        this.onContinue(tableGame)
     }
 
     emitStartGame() {
@@ -33,6 +41,20 @@ class Socket {
             this.isActive = true;
             this._currentRoom = rooms;
         });
+
+        this._socket.on("new opponent", (listPlayer: player[]) => {
+            // enlever l"utilisateur courant (ce n'est pas un adversaire ^_^)
+            listPlayer = listPlayer.filter(e => e.id !== this._socket.id)
+
+            let ul = showAvailableOpponent(listPlayer);
+            ul.onclick = (e: MouseEvent) => {
+                let target = e.target as HTMLLIElement,
+                    [idRoom, idAway] = target.id.split(";"),
+                    room = `room${idRoom}`;
+                
+                this._socket.emit("to ready", room, this._socket.id, idAway)
+            } 
+        })
     }
 
     setCurrentPoint(circle: Point, croix: Point) {
@@ -83,15 +105,11 @@ class Socket {
     }
 
     emitReset() {
-        console.log("emit rest");
-        
         this._socket.emit("to reset", this._currentRoom);
     }
 
     onReset(tableGame: TableGame, circle: Point, croix: Point) {
         this._socket.on("reset", () => {
-            console.log("reset");
-
             tableGame.reset(circle, croix);
             if(this.place === "home") {
                 this.isActive = true

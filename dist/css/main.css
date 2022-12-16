@@ -11,19 +11,32 @@ body {
     position: fixed;
     width: 100%;
     height: 100%;
-    background-color: black;
+    background-color: #121212;
     color: rgb(218, 218, 218);
     font-family: sans-serif;
 }
 
 .container {
-    display: grid;
-    grid-template-columns: auto auto auto;
-    grid-template-rows: auto auto auto;
-    grid-gap: 6px;
     width: 300px;
     height: 300px;
     background-color: #adadad;
+}
+
+.container > div {
+    width: 100%;
+    height: 100%;
+}
+.table-game {
+    display: grid;
+    grid-gap: 6px;
+    grid-template-columns: auto auto auto;
+    grid-template-rows: auto auto auto;
+}
+.wait-opponent {
+    position: relative;
+    background-color: #212121;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
 .case {
@@ -173,6 +186,112 @@ body {
 .btn-container button:hover {
     color: rgb(220, 229, 236);
     transform: translate(2px);
+}
+
+/* list opponent */
+h2 {
+    width: 100%;
+    height: 27px;
+    font-size: 18px;
+    padding: 0 5px;
+    border-bottom: 1px solid rgb(156, 156, 156);
+}
+
+.list-opponent {
+    margin: 0;
+    padding: 0 8px;
+    list-style-type: none;
+}
+
+.list-opponent > li {
+    padding: 6px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.list-opponent > li:hover {
+    background-color: #434343;
+}
+
+.list-opponent > li:nth-child(even) {
+    background-color: #333333;
+    color: rgb(222, 222, 222);
+}
+
+.animation {
+    position: absolute;
+    width: 100%;
+    display: grid;
+    grid-template-columns: auto auto auto auto;
+    gap: 4px;
+    justify-content: center;
+}
+.bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 6px;
+    height: 25px;
+}
+.bar::after {
+    position: absolute;
+    content: "";
+    display: block;
+    width: 100%;
+    height: 20%;
+    border-radius: 4px;
+    background-color: #767676;
+    transition: all 0.2s ease;
+    animation-duration: 0.4s;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+.loading .even.bar::after {
+    animation-name: animate-bar-even;
+}
+.loading .odd.bar::after {
+    animation-name: animate-bar-even;
+}
+.b1.bar::after {animation-delay: -0.2s;}
+.b2.bar::after {animation-delay: -0.1s;}
+.b3.bar::after {animation-delay: 0s;}
+.b4.bar::after {animation-delay: 0.1s;}
+
+
+/* pair */
+@keyframes animate-bar-even {
+    0% {
+        background-color: #767676;
+        height: 20%;
+    }
+    100% {
+        background-color: #6f6f6f;
+        height: 80%;
+    }
+}
+
+/* impair */
+@keyframes animate-bar-odd {
+    0% {
+        background-color: #767676;
+        height: 20%;
+    }
+    100% {
+        background-color: #6f6f6f;
+        height: 80%;
+    }
+}
+
+
+::-webkit-scrollbar {
+    background-color: #373737;;
+    width: 10px;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-button {
+    background-color: #404040;
+}
+::-webkit-scrollbar-track-piece {
+    background-color: #494848;
 }
 
 

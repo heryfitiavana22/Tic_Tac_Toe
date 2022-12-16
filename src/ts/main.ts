@@ -9,18 +9,14 @@ import Socket from "./socket"
         circle: Point = new Point('player1', '<span class="point circle"></span>'),
         croix: Point = new Point('player2', '<span class="point croix"></span>');
     // init table game
-    tableGame.init()
+    // tableGame.init()
 
-    let container = document.querySelector(".container") as HTMLDivElement;
+    let container = document.querySelector(".container  > div") as HTMLDivElement;
 
     let socket = new Socket()
     socket.isSocket = true
     if(socket.isSocket) {
-        socket.init()
-        socket.setCurrentPoint(circle, croix);
-        socket.onDrawPoint(tableGame, circle, croix, socket)
-        socket.onReset(tableGame, circle, croix)
-        socket.onContinue(tableGame)
+        socket.init(tableGame, circle, croix, socket)
     }
         
     container.onclick = (e: MouseEvent) => {
@@ -28,7 +24,6 @@ import Socket from "./socket"
             coords = target.id.split(";"),
             x = Number(coords[0]),
             y = Number(coords[1]);
-    console.log(socket.isActive );
     
         // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
         // et si on est autorisé de clické (si en ligne)

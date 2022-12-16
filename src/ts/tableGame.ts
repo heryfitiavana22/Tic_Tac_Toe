@@ -22,6 +22,9 @@ class TableGame {
         this._adjacentMatrix = [];
         this.createAdjacentMatrix();
         this.drawTable();
+
+        let container = document.querySelector(".container > div") as HTMLDivElement;
+        container.className = "table-game"
     }
 
     drawTable() {
@@ -31,7 +34,7 @@ class TableGame {
                 casesHTML += `<div class="case" id="${i};${j}"></div>`;
             }
         }
-        (document.querySelector(".container") as HTMLElement).innerHTML =
+        (document.querySelector(".container > div") as HTMLElement).innerHTML =
             casesHTML;
     }
 

@@ -1,6 +1,11 @@
 declare type Coordinate = [number, number];
 declare type CoordsWinner = [Coordinate[]];
 declare type AdjacentMatrix = [...number[]][];
+declare interface player {
+    id: string,
+    room: string, 
+    socket: any
+}
 
 declare class Point {
     score: number;
@@ -36,9 +41,10 @@ declare class SocketType {
     isActive: boolean
     isSocket: boolean
     place: string // (home ou away)
+    myName: string;
     _currentRoom: string
     _socket: Function
-    init(): void
+    init(tableGame: TableGame, circle: Point, croix: Point, socket: any): void
     emitStartGame(): void
     onReady(): void
     waitingForOpponent(): void
