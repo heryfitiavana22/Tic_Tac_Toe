@@ -3,14 +3,15 @@ import { io } from "socket.io-client";
 class Socket {
     isActive = false;
     isSocket = false;
-    private _currentRoom = "";
-    private _socket = io();
+    place = ""; // (home ou away)
+    _currentRoom = "";
+    _socket = io();
 
     init() {
         this.emitStartGame();
         this.onReady();
         this.waitingForOpponent();
-        this.toActive()
+        this.toActive();
     }
 
     emitStartGame() {
@@ -34,21 +35,19 @@ class Socket {
         });
     }
 
-    setCurrentPoint(tableGame: TableGame, circle: Point, croix: Point) {
+    setCurrentPoint(circle: Point, croix: Point) {
         let currentPlayerHTML = document.querySelector(
             ".current-player"
         ) as HTMLElement;
         this._socket.on("home", () => {
             console.log("home");
-            // tableGame.currentPlayer = 1
-            // tableGame.currentPointHTML = circle.pointHTML;
+            this.place = "home";
             currentPlayerHTML.innerHTML = circle.pointHTML;
         });
 
         this._socket.on("away", () => {
             console.log("away");
-            // tableGame.currentPlayer = 2;
-            // tableGame.currentPointHTML = croix.pointHTML;
+            this.place = "away";
             currentPlayerHTML.innerHTML = croix.pointHTML;
         });
     }
@@ -57,28 +56,59 @@ class Socket {
         this._socket.emit("set point", x, y, this._currentRoom);
     }
 
-    drawPoint(tableGame: TableGame, circle: Point, croix: Point) {
+    onDrawPoint(
+        tableGame: TableGame,
+        circle: Point,
+        croix: Point,
+        socket: any
+    ) {
         this._socket.on("draw point", (x: number, y: number) => {
             tableGame.drawPoint(x, y);
             tableGame.pushCoords(x, y);
             tableGame.isWinning = tableGame.checkWinner();
             // changement de joueur et verifier s'il a gagné
-            tableGame.permutation(circle, croix);
+            tableGame.permutation(circle, croix, socket);
         });
     }
-    
+
     toActive() {
         this._socket.on("to active", () => {
-
-            console.log("to active");
-            
             // permutation (mettre l'autre joueur active)
-            if(this.isActive) {
-                this.isActive = false
+            if (this.isActive) {
+                this.isActive = false;
+                return;
+            }
+            this.isActive = true;
+        });
+    }
+
+    emitReset() {
+        console.log("emit rest");
+        
+        this._socket.emit("to reset", this._currentRoom);
+    }
+
+    onReset(tableGame: TableGame, circle: Point, croix: Point) {
+        this._socket.on("reset", () => {
+            console.log("reset");
+
+            tableGame.reset(circle, croix);
+            if(this.place === "home") {
+                this.isActive = true
                 return
             }
-            this.isActive = true
-        })
+            this.isActive = false
+        });
+    }
+
+    emitContinue() {
+        this._socket.emit("to continue", this._currentRoom);
+    }
+
+    onContinue(tableGame: TableGame) {
+        this._socket.on("continue", () => {
+            tableGame.continue();
+        });
     }
 }
 

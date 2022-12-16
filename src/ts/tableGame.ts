@@ -88,7 +88,7 @@ class TableGame {
                 `(2|1|0){2}[${p}](2|1|0){1}[${p}](2|1|0){1}[${p}](2|1|0){2}`
             );
 
-        console.log(coords);
+        // console.log(coords);
         if (col.test(coords)) {
             console.log("winner circle col" + p);
             // chercher l'indice de depart pour tracer la ligne
@@ -211,7 +211,8 @@ class TableGame {
     reset(circle: Point, croix: Point) {
         this.init();
         this.currentPlayer = 1;
-        this.currentPointHTML = '<span class="point circle"></span>';
+        this.currentPointHTML = circle.pointHTML;
+        this.currentPlayerHTML.innerHTML = circle.pointHTML
         circle.init();
         croix.init();
         let resultHTML = document.querySelector(".result") as HTMLDivElement;
@@ -226,7 +227,7 @@ class TableGame {
         resultHTML.innerHTML = "";
     }
 
-    permutation(circle: Point, croix: Point) {
+    permutation(circle: Point, croix: Point, socket?: any) {
         // player 1 : circle; player 2: croix
         // change currentPlayer and currentPointHTML
         if (this.currentPlayer === 1) {
@@ -236,7 +237,7 @@ class TableGame {
             // si gagnant
             if (this.isWinning) {
                 circle.win();
-                this.btnResult(circle, croix);
+                this.btnResult(circle, croix, socket);
             }
         } else {
             this.currentPlayer = 1;
@@ -245,12 +246,12 @@ class TableGame {
             // si gagnant
             if (this.isWinning) {
                 croix.win();
-                this.btnResult(circle, croix);
+                this.btnResult(circle, croix, socket);
             }
         }
     }
 
-    btnResult(circle: Point, croix: Point) {
+    btnResult(circle: Point, croix: Point, socket?: SocketType) {
         let btnReset = document.querySelector(
                 "button.reset"
             ) as HTMLButtonElement,
@@ -259,10 +260,26 @@ class TableGame {
             ) as HTMLButtonElement;
 
         btnReset.onclick = () => {
+            // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
+            if (socket && socket.place === "away") return
+            // si en ligne et "home" a clické
+            if(socket?.place === "home") {
+                socket.emitReset()
+                return
+            }
             this.reset(circle, croix);
-            this.currentPlayerHTML.innerHTML = circle.pointHTML;
         };
+
         btnContinue.onclick = () => {
+            // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
+            if (socket && socket.place === "away") return
+            // si en ligne et "home" a clické
+            if(socket?.place === "home") {
+                console.log("emit contine");
+                
+                socket.emitContinue()
+                return
+            }
             this.continue();
         };
     }

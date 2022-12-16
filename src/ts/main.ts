@@ -17,9 +17,10 @@ import Socket from "./socket"
     socket.isSocket = true
     if(socket.isSocket) {
         socket.init()
-        socket.setCurrentPoint(tableGame, circle, croix);
-        // on draw point
-        socket.drawPoint(tableGame, circle, croix)
+        socket.setCurrentPoint(circle, croix);
+        socket.onDrawPoint(tableGame, circle, croix, socket)
+        socket.onReset(tableGame, circle, croix)
+        socket.onContinue(tableGame)
     }
         
     container.onclick = (e: MouseEvent) => {
@@ -27,6 +28,7 @@ import Socket from "./socket"
             coords = target.id.split(";"),
             x = Number(coords[0]),
             y = Number(coords[1]);
+    console.log(socket.isActive );
     
         // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
         // et si on est autorisé de clické (si en ligne)
@@ -40,6 +42,7 @@ import Socket from "./socket"
             
         // emit point to server if socket
         if(socket.isSocket) {
+            // on draw point
             socket.emitPoint(x, y)
             return
         }

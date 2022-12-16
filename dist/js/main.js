@@ -794,6 +794,7 @@ var Socket = /** @class */ (function () {
     function Socket() {
         this.isActive = false;
         this.isSocket = false;
+        this.place = ""; // (home ou away)
         this._currentRoom = "";
         this._socket = (0, socket_io_client_1.io)();
     }
@@ -823,43 +824,65 @@ var Socket = /** @class */ (function () {
             _this._currentRoom = rooms;
         });
     };
-    Socket.prototype.setCurrentPoint = function (tableGame, circle, croix) {
+    Socket.prototype.setCurrentPoint = function (circle, croix) {
+        var _this = this;
         var currentPlayerHTML = document.querySelector(".current-player");
         this._socket.on("home", function () {
             console.log("home");
-            // tableGame.currentPlayer = 1
-            // tableGame.currentPointHTML = circle.pointHTML;
+            _this.place = "home";
             currentPlayerHTML.innerHTML = circle.pointHTML;
         });
         this._socket.on("away", function () {
             console.log("away");
-            // tableGame.currentPlayer = 2;
-            // tableGame.currentPointHTML = croix.pointHTML;
+            _this.place = "away";
             currentPlayerHTML.innerHTML = croix.pointHTML;
         });
     };
     Socket.prototype.emitPoint = function (x, y) {
         this._socket.emit("set point", x, y, this._currentRoom);
     };
-    Socket.prototype.drawPoint = function (tableGame, circle, croix) {
+    Socket.prototype.onDrawPoint = function (tableGame, circle, croix, socket) {
         this._socket.on("draw point", function (x, y) {
             tableGame.drawPoint(x, y);
             tableGame.pushCoords(x, y);
             tableGame.isWinning = tableGame.checkWinner();
             // changement de joueur et verifier s'il a gagné
-            tableGame.permutation(circle, croix);
+            tableGame.permutation(circle, croix, socket);
         });
     };
     Socket.prototype.toActive = function () {
         var _this = this;
         this._socket.on("to active", function () {
-            console.log("to active");
             // permutation (mettre l'autre joueur active)
             if (_this.isActive) {
                 _this.isActive = false;
                 return;
             }
             _this.isActive = true;
+        });
+    };
+    Socket.prototype.emitReset = function () {
+        console.log("emit rest");
+        this._socket.emit("to reset", this._currentRoom);
+    };
+    Socket.prototype.onReset = function (tableGame, circle, croix) {
+        var _this = this;
+        this._socket.on("reset", function () {
+            console.log("reset");
+            tableGame.reset(circle, croix);
+            if (_this.place === "home") {
+                _this.isActive = true;
+                return;
+            }
+            _this.isActive = false;
+        });
+    };
+    Socket.prototype.emitContinue = function () {
+        this._socket.emit("to continue", this._currentRoom);
+    };
+    Socket.prototype.onContinue = function (tableGame) {
+        this._socket.on("continue", function () {
+            tableGame.continue();
         });
     };
     return Socket;
@@ -941,7 +964,7 @@ var TableGame = /** @class */ (function () {
         diagonal = new RegExp("[".concat(p, "](2|1|0){3}[").concat(p, "](2|1|0){3}[").concat(p, "]")), 
         // ex : 001010100 (1 => player1; 2 => player2; 0 => case vide)
         contreDiagonal = new RegExp("(2|1|0){2}[".concat(p, "](2|1|0){1}[").concat(p, "](2|1|0){1}[").concat(p, "](2|1|0){2}"));
-        console.log(coords);
+        // console.log(coords);
         if (col.test(coords)) {
             console.log("winner circle col" + p);
             var _loop_1 = function (i) {
@@ -1050,7 +1073,8 @@ var TableGame = /** @class */ (function () {
     TableGame.prototype.reset = function (circle, croix) {
         this.init();
         this.currentPlayer = 1;
-        this.currentPointHTML = '<span class="point circle"></span>';
+        this.currentPointHTML = circle.pointHTML;
+        this.currentPlayerHTML.innerHTML = circle.pointHTML;
         circle.init();
         croix.init();
         var resultHTML = document.querySelector(".result");
@@ -1063,7 +1087,7 @@ var TableGame = /** @class */ (function () {
         resultHTML.style.transform = "scale(0)";
         resultHTML.innerHTML = "";
     };
-    TableGame.prototype.permutation = function (circle, croix) {
+    TableGame.prototype.permutation = function (circle, croix, socket) {
         // player 1 : circle; player 2: croix
         // change currentPlayer and currentPointHTML
         if (this.currentPlayer === 1) {
@@ -1073,7 +1097,7 @@ var TableGame = /** @class */ (function () {
             // si gagnant
             if (this.isWinning) {
                 circle.win();
-                this.btnResult(circle, croix);
+                this.btnResult(circle, croix, socket);
             }
         }
         else {
@@ -1083,18 +1107,34 @@ var TableGame = /** @class */ (function () {
             // si gagnant
             if (this.isWinning) {
                 croix.win();
-                this.btnResult(circle, croix);
+                this.btnResult(circle, croix, socket);
             }
         }
     };
-    TableGame.prototype.btnResult = function (circle, croix) {
+    TableGame.prototype.btnResult = function (circle, croix, socket) {
         var _this = this;
         var btnReset = document.querySelector("button.reset"), btnContinue = document.querySelector("button.continue");
         btnReset.onclick = function () {
+            // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
+            if (socket && socket.place === "away")
+                return;
+            // si en ligne et "home" a clické
+            if ((socket === null || socket === void 0 ? void 0 : socket.place) === "home") {
+                socket.emitReset();
+                return;
+            }
             _this.reset(circle, croix);
-            _this.currentPlayerHTML.innerHTML = circle.pointHTML;
         };
         btnContinue.onclick = function () {
+            // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
+            if (socket && socket.place === "away")
+                return;
+            // si en ligne et "home" a clické
+            if ((socket === null || socket === void 0 ? void 0 : socket.place) === "home") {
+                console.log("emit contine");
+                socket.emitContinue();
+                return;
+            }
             _this.continue();
         };
     };
@@ -5331,12 +5371,14 @@ var socket_1 = __webpack_require__(/*! ./socket */ "./src/ts/socket.ts");
     socket.isSocket = true;
     if (socket.isSocket) {
         socket.init();
-        socket.setCurrentPoint(tableGame, circle, croix);
-        // on draw point
-        socket.drawPoint(tableGame, circle, croix);
+        socket.setCurrentPoint(circle, croix);
+        socket.onDrawPoint(tableGame, circle, croix, socket);
+        socket.onReset(tableGame, circle, croix);
+        socket.onContinue(tableGame);
     }
     container.onclick = function (e) {
         var target = e.target, coords = target.id.split(";"), x = Number(coords[0]), y = Number(coords[1]);
+        console.log(socket.isActive);
         // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
         // et si on est autorisé de clické (si en ligne)
         if (!socket.isActive ||
@@ -5346,6 +5388,7 @@ var socket_1 = __webpack_require__(/*! ./socket */ "./src/ts/socket.ts");
             return;
         // emit point to server if socket
         if (socket.isSocket) {
+            // on draw point
             socket.emitPoint(x, y);
             return;
         }

@@ -28,6 +28,26 @@ declare class TableGame {
     checkWinner(): boolean;
     reset(circle: Point, croix: Point): void;
     continue(): void;
-    permutation(circle: Point, croix: Point): void;
+    permutation(circle: Point, croix: Point, socket?: SocketType): void;
     btnResult(circle: Point, croix: Point): void;
+}
+
+declare class SocketType {
+    isActive: boolean
+    isSocket: boolean
+    place: string // (home ou away)
+    _currentRoom: string
+    _socket: Function
+    init(): void
+    emitStartGame(): void
+    onReady(): void
+    waitingForOpponent(): void
+    setCurrentPoint(): void
+    emitPoint(): void
+    onDrawPoint(): void
+    toActive(): void
+    emitReset(): void
+    onReset(tableGame: TableGame, circle: Point, croix: Point): void
+    emitContinue(): void
+    onContinue(tableGame: TableGame): void
 }

@@ -43,7 +43,6 @@ io.on("connection", (socket) => {
 
         socket.emit("home")
         socket.emit("waiting opponent", `rooms${currentRoom}`);
-
     });
 
     socket.on("set point", (x: number, y: number, room: string) => {    
@@ -51,6 +50,15 @@ io.on("connection", (socket) => {
         io.in(room).emit("draw point", x, y);
     });
 
+    socket.on("to reset", (room: string) => {
+        console.log(room);
+        
+        io.in(room).emit("reset")
+    })
+
+    socket.on("to continue", (room: string) => {
+        io.in(room).emit("continue")
+    })
 
     socket.on("disconnect", (reason) => {
         console.log("user disconnected " + reason);
