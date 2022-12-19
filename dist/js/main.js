@@ -758,7 +758,16 @@ function plural(ms, msAbs, n, name) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.showAvailableOpponent = void 0;
+exports.showAvailableOpponent = exports.waitingForOpponent = void 0;
+function waitingForOpponent() {
+    var container = document.querySelector(".container  > div");
+    container.className = "wait-opponent";
+    container.innerHTML =
+        "<h2>Available opponent :</h2>\n    <ul class=\"list-opponent\">\n        \n    </ul>\n    <div class=\"animation\">\n        <div class=\"bar b1 odd\"></div>\n        <div class=\"bar b2 even\"></div>\n        <div class=\"bar b3 odd\"></div>\n        <div class=\"bar b4 even\"></div>\n    </div>";
+    var animation = document.querySelector(".animation");
+    animation.classList.add("loading");
+}
+exports.waitingForOpponent = waitingForOpponent;
 function showAvailableOpponent(list) {
     var container = document.querySelector(".container  > div"), ul = document.querySelector("ul.list-opponent"), listHTML = "";
     container.className = "wait-opponent";
@@ -829,7 +838,7 @@ var Socket = /** @class */ (function () {
     }
     Socket.prototype.init = function (tableGame, circle, croix, socket) {
         this.emitStartGame();
-        this.onReady();
+        this.onReady(tableGame);
         this.waitingForOpponent();
         this.toActive();
         this.setCurrentPoint(circle, croix);
@@ -840,29 +849,36 @@ var Socket = /** @class */ (function () {
     Socket.prototype.emitStartGame = function () {
         this._socket.emit("start game");
     };
-    Socket.prototype.onReady = function () {
+    Socket.prototype.onReady = function (tableGame) {
         var _this = this;
         this._socket.on("ready", function (home, away, room) {
             _this._currentRoom = room;
-            console.log("ready");
-            console.log("".concat(home, " vs ").concat(away, " in ").concat(room));
+            // console.log("ready");
+            // console.log(`${home} vs ${away} in ${room}`);
+            tableGame.init();
         });
     };
     Socket.prototype.waitingForOpponent = function () {
         var _this = this;
         this._socket.on("waiting opponent", function (rooms) {
-            console.log("waiting opponent");
-            // home
+            // console.log("wait oppo")
+            // console.log("waiting opponent");
+            (0, func_1.waitingForOpponent)();
+            // home (admettons)
             _this.isActive = true;
             _this._currentRoom = rooms;
         });
         this._socket.on("new opponent", function (listPlayer) {
+            // console.log("new oppo");
             // enlever l"utilisateur courant (ce n'est pas un adversaire ^_^)
             listPlayer = listPlayer.filter(function (e) { return e.id !== _this._socket.id; });
             var ul = (0, func_1.showAvailableOpponent)(listPlayer);
             ul.onclick = function (e) {
-                var target = e.target, _a = target.id.split(";"), idRoom = _a[0], idAway = _a[1], room = "room".concat(idRoom);
+                var target = e.target, _a = target.id.split(";"), idAway = _a[0], idRoom = _a[1], room = "room".concat(idRoom), animation = document.querySelector(".animation");
                 _this._socket.emit("to ready", room, _this._socket.id, idAway);
+                // changer le "room" par le "room" de l'adversaire
+                _this._currentRoom = "room".concat(idRoom);
+                animation.classList.remove("loading");
             };
         });
     };
@@ -870,13 +886,15 @@ var Socket = /** @class */ (function () {
         var _this = this;
         var currentPlayerHTML = document.querySelector(".current-player");
         this._socket.on("home", function () {
-            console.log("home");
+            // console.log("home");
             _this.place = "home";
+            _this.isActive = true;
             currentPlayerHTML.innerHTML = circle.pointHTML;
         });
         this._socket.on("away", function () {
-            console.log("away");
+            // console.log("away");
             _this.place = "away";
+            _this.isActive = false;
             currentPlayerHTML.innerHTML = croix.pointHTML;
         });
     };
@@ -5405,37 +5423,48 @@ var tableGame_1 = __webpack_require__(/*! ./tableGame */ "./src/ts/tableGame.ts"
 var point_1 = __webpack_require__(/*! ./point */ "./src/ts/point.ts");
 var socket_1 = __webpack_require__(/*! ./socket */ "./src/ts/socket.ts");
 (function () {
+    var btnLocal = document.querySelector("#local"), btnOnline = document.querySelector("#online");
     var tableGame = new tableGame_1.default(3, 3), circle = new point_1.default('player1', '<span class="point circle"></span>'), croix = new point_1.default('player2', '<span class="point croix"></span>');
-    // init table game
-    // tableGame.init()
     var container = document.querySelector(".container  > div");
     var socket = new socket_1.default();
-    socket.isSocket = true;
-    if (socket.isSocket) {
-        socket.init(tableGame, circle, croix, socket);
-    }
-    container.onclick = function (e) {
-        var target = e.target, coords = target.id.split(";"), x = Number(coords[0]), y = Number(coords[1]);
-        // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
-        // et si on est autorisé de clické (si en ligne)
-        if (!socket.isActive ||
-            target.innerHTML.length > 0 ||
-            coords.length !== 2 ||
-            tableGame.isWinning)
-            return;
-        // emit point to server if socket
-        if (socket.isSocket) {
-            // on draw point
-            socket.emitPoint(x, y);
-            return;
-        }
-        console.log("not socket");
-        tableGame.drawPoint(x, y);
-        tableGame.pushCoords(x, y);
-        tableGame.isWinning = tableGame.checkWinner();
-        // changement de joueur et verifier s'il a gagné
-        tableGame.permutation(circle, croix);
+    btnLocal.onclick = function (e) {
+        socket.isSocket = false;
+        socket.isActive = true;
+        // init table game
+        tableGame.init();
+        start();
     };
+    btnOnline.onclick = function (e) {
+        socket.init(tableGame, circle, croix, socket);
+        socket.isSocket = true;
+        // init table game
+        tableGame.init();
+        start();
+    };
+    function start() {
+        container.onclick = function (e) {
+            var target = e.target, coords = target.id.split(";"), x = Number(coords[0]), y = Number(coords[1]);
+            // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
+            // et si on est autorisé de clické (si en ligne)
+            if (!socket.isActive ||
+                target.innerHTML.length > 0 ||
+                coords.length !== 2 ||
+                tableGame.isWinning)
+                return;
+            // emit point to server if socket
+            if (socket.isSocket) {
+                // on draw point
+                socket.emitPoint(x, y);
+                return;
+            }
+            console.log("not socket");
+            tableGame.drawPoint(x, y);
+            tableGame.pushCoords(x, y);
+            tableGame.isWinning = tableGame.checkWinner();
+            // changement de joueur et verifier s'il a gagné
+            tableGame.permutation(circle, croix);
+        };
+    }
 })();
 
 })();

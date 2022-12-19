@@ -217,11 +217,12 @@ h2 {
 .animation {
     position: absolute;
     width: 100%;
-    display: grid;
+    display: none;
     grid-template-columns: auto auto auto auto;
     gap: 4px;
     justify-content: center;
 }
+.animation.loading {display: grid;}
 .bar {
     position: relative;
     display: flex;

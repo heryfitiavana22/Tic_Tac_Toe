@@ -1,3 +1,21 @@
+export function waitingForOpponent() {
+    let container = document.querySelector(".container  > div") as HTMLDivElement;
+    container.className = "wait-opponent"
+    container.innerHTML =
+    `<h2>Available opponent :</h2>
+    <ul class="list-opponent">
+        
+    </ul>
+    <div class="animation">
+        <div class="bar b1 odd"></div>
+        <div class="bar b2 even"></div>
+        <div class="bar b3 odd"></div>
+        <div class="bar b4 even"></div>
+    </div>`
+    let animation = document.querySelector(".animation") as HTMLDivElement;
+    animation.classList.add("loading")
+}
+
 export function showAvailableOpponent(list: player[]): HTMLUListElement {
     let container = document.querySelector(".container  > div") as HTMLDivElement,
         ul = document.querySelector("ul.list-opponent") as HTMLUListElement,

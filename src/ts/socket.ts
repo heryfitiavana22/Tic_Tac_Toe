@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import {showAvailableOpponent} from "./func"
+import { showAvailableOpponent, waitingForOpponent } from "./func";
 
 class Socket {
     isActive = false;
@@ -9,52 +9,60 @@ class Socket {
     _currentRoom = "";
     _socket = io();
 
-
-
     init(tableGame: TableGame, circle: Point, croix: Point, socket: any) {
         this.emitStartGame();
-        this.onReady();
+        this.onReady(tableGame);
         this.waitingForOpponent();
         this.toActive();
         this.setCurrentPoint(circle, croix);
-        this.onDrawPoint(tableGame, circle, croix, socket)
-        this.onReset(tableGame, circle, croix)
-        this.onContinue(tableGame)
+        this.onDrawPoint(tableGame, circle, croix, socket);
+        this.onReset(tableGame, circle, croix);
+        this.onContinue(tableGame);
     }
 
     emitStartGame() {
         this._socket.emit("start game");
     }
 
-    onReady() {
+    onReady(tableGame: TableGame) {
         this._socket.on("ready", (home, away, room) => {
             this._currentRoom = room;
-            console.log("ready");
-            console.log(`${home} vs ${away} in ${room}`);
+            // console.log("ready");
+            // console.log(`${home} vs ${away} in ${room}`);
+            tableGame.init();
         });
     }
 
     waitingForOpponent() {
         this._socket.on("waiting opponent", (rooms) => {
-            console.log("waiting opponent");
-            // home
+            // console.log("wait oppo")
+            // console.log("waiting opponent");
+            waitingForOpponent()
+            // home (admettons)
             this.isActive = true;
             this._currentRoom = rooms;
         });
 
         this._socket.on("new opponent", (listPlayer: player[]) => {
+            // console.log("new oppo");
             // enlever l"utilisateur courant (ce n'est pas un adversaire ^_^)
-            listPlayer = listPlayer.filter(e => e.id !== this._socket.id)
+            listPlayer = listPlayer.filter((e) => e.id !== this._socket.id);
 
             let ul = showAvailableOpponent(listPlayer);
             ul.onclick = (e: MouseEvent) => {
                 let target = e.target as HTMLLIElement,
-                    [idRoom, idAway] = target.id.split(";"),
-                    room = `room${idRoom}`;
-                
-                this._socket.emit("to ready", room, this._socket.id, idAway)
-            } 
-        })
+                    [idAway, idRoom] = target.id.split(";"),
+                    room = `room${idRoom}`,
+                    animation = document.querySelector(
+                        ".animation"
+                    ) as HTMLDivElement;
+
+                this._socket.emit("to ready", room, this._socket.id, idAway);
+                // changer le "room" par le "room" de l'adversaire
+                this._currentRoom = `room${idRoom}`;
+                animation.classList.remove("loading");
+            };
+        });
     }
 
     setCurrentPoint(circle: Point, croix: Point) {
@@ -62,14 +70,16 @@ class Socket {
             ".current-player"
         ) as HTMLElement;
         this._socket.on("home", () => {
-            console.log("home");
+            // console.log("home");
             this.place = "home";
+            this.isActive = true;
             currentPlayerHTML.innerHTML = circle.pointHTML;
         });
 
         this._socket.on("away", () => {
-            console.log("away");
+            // console.log("away");
             this.place = "away";
+            this.isActive = false;
             currentPlayerHTML.innerHTML = croix.pointHTML;
         });
     }
@@ -111,11 +121,11 @@ class Socket {
     onReset(tableGame: TableGame, circle: Point, croix: Point) {
         this._socket.on("reset", () => {
             tableGame.reset(circle, croix);
-            if(this.place === "home") {
-                this.isActive = true
-                return
+            if (this.place === "home") {
+                this.isActive = true;
+                return;
             }
-            this.isActive = false
+            this.isActive = false;
         });
     }
 

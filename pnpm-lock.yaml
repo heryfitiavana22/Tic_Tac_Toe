@@ -5,6 +5,7 @@ specifiers:
   '@types/node': ^18.11.10
   '@types/webpack': ^5.28.0
   css-loader: ^6.7.2
+  dotenv: ^16.0.3
   ejs: ^3.1.8
   express: ^4.18.2
   html-webpack-plugin: ^5.5.0
@@ -33,6 +34,7 @@ devDependencies:
   '@types/node': 18.11.10
   '@types/webpack': 5.28.0_webpack-cli@5.0.0
   css-loader: 6.7.2_webpack@5.75.0
+  dotenv: 16.0.3
   html-webpack-plugin: 5.5.0_webpack@5.75.0
   mini-css-extract-plugin: 2.7.1_webpack@5.75.0
   style-loader: 3.3.1_webpack@5.75.0
@@ -822,6 +824,11 @@ packages:
     dependencies:
       no-case: 3.0.4
       tslib: 2.4.1
+    dev: true
+
+  /dotenv/16.0.3:
+    resolution: {integrity: sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==}
+    engines: {node: '>=12'}
     dev: true
 
   /ee-first/1.1.1:
