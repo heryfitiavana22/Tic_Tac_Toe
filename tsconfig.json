@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "outDir": "dist",
+        "outDir": "dist/server",
         "noImplicitAny": true,
         "target": "ES5",
         "allowJs": true,
