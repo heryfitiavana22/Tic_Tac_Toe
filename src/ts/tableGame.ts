@@ -6,8 +6,11 @@ class TableGame {
     dimensionY: number;
     // currentPoint: Point = circle;
     currentPointHTML = '<span class="point circle"></span>';
+    currentPlayerHTML = document.querySelector(
+        ".current-player"
+    ) as HTMLElement;
     // matrice d'adjacence qui represente le table (1 => player1; 2 => player2; 0 => case vide)
-    private _adjacentMatrix: AdjacentMatrix = [];
+    _adjacentMatrix: AdjacentMatrix = [];
 
     constructor(x: number, y: number) {
         this.dimensionX = x;
@@ -15,10 +18,13 @@ class TableGame {
     }
 
     init() {
-        this.isWinning = false
-        this._adjacentMatrix = []
-        this.createAdjacentMatrix()
-        this.drawTable()
+        this.isWinning = false;
+        this._adjacentMatrix = [];
+        this.createAdjacentMatrix();
+        this.drawTable();
+
+        let container = document.querySelector(".container > div") as HTMLDivElement;
+        container.className = "table-game"
     }
 
     drawTable() {
@@ -28,7 +34,7 @@ class TableGame {
                 casesHTML += `<div class="case" id="${i};${j}"></div>`;
             }
         }
-        (document.querySelector(".container") as HTMLElement).innerHTML =
+        (document.querySelector(".container > div") as HTMLElement).innerHTML =
             casesHTML;
     }
 
@@ -43,7 +49,8 @@ class TableGame {
         // console.log(this.adjacentMatrix);
     }
 
-    drawPoint(caseHTML: HTMLDivElement) {
+    drawPoint(x: number, y: number) {
+        let caseHTML = document.getElementById(`${x};${y}`) as HTMLDivElement;
         caseHTML.innerHTML = this.currentPointHTML;
         caseHTML.style.cursor = "not-allowed";
     }
@@ -84,7 +91,7 @@ class TableGame {
                 `(2|1|0){2}[${p}](2|1|0){1}[${p}](2|1|0){1}[${p}](2|1|0){2}`
             );
 
-        console.log(coords);
+        // console.log(coords);
         if (col.test(coords)) {
             console.log("winner circle col" + p);
             // chercher l'indice de depart pour tracer la ligne
@@ -205,21 +212,79 @@ class TableGame {
     }
 
     reset(circle: Point, croix: Point) {
-        this.init()
+        this.init();
         this.currentPlayer = 1;
-        this.currentPointHTML = '<span class="point circle"></span>';
-        circle.init()
-        croix.init()
+        this.currentPointHTML = circle.pointHTML;
+        this.currentPlayerHTML.innerHTML = circle.pointHTML
+        circle.init();
+        croix.init();
         let resultHTML = document.querySelector(".result") as HTMLDivElement;
         resultHTML.style.transform = "scale(0)";
         resultHTML.innerHTML = "";
     }
 
     continue() {
-        this.init()
+        this.init();
         let resultHTML = document.querySelector(".result") as HTMLDivElement;
-        resultHTML.style.transform = "scale(0)"
-        resultHTML.innerHTML = ""
+        resultHTML.style.transform = "scale(0)";
+        resultHTML.innerHTML = "";
+    }
+
+    permutation(circle: Point, croix: Point, socket?: any) {
+        // player 1 : circle; player 2: croix
+        // change currentPlayer and currentPointHTML
+        if (this.currentPlayer === 1) {
+            this.currentPlayer = 2;
+            this.currentPointHTML = croix.pointHTML;
+            this.currentPlayerHTML.innerHTML = croix.pointHTML;
+            // si gagnant
+            if (this.isWinning) {
+                circle.win();
+                this.btnResult(circle, croix, socket);
+            }
+        } else {
+            this.currentPlayer = 1;
+            this.currentPointHTML = circle.pointHTML;
+            this.currentPlayerHTML.innerHTML = circle.pointHTML;
+            // si gagnant
+            if (this.isWinning) {
+                croix.win();
+                this.btnResult(circle, croix, socket);
+            }
+        }
+    }
+
+    btnResult(circle: Point, croix: Point, socket?: SocketType) {
+        let btnReset = document.querySelector(
+                "button.reset"
+            ) as HTMLButtonElement,
+            btnContinue = document.querySelector(
+                "button.continue"
+            ) as HTMLButtonElement;
+
+        btnReset.onclick = () => {
+            // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
+            if (socket && socket.place === "away") return
+            // si en ligne et "home" a clické
+            if(socket?.place === "home") {
+                socket.emitReset()
+                return
+            }
+            this.reset(circle, croix);
+        };
+
+        btnContinue.onclick = () => {
+            // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
+            if (socket && socket.place === "away") return
+            // si en ligne et "home" a clické
+            if(socket?.place === "home") {
+                console.log("emit contine");
+                
+                socket.emitContinue()
+                return
+            }
+            this.continue();
+        };
     }
 }
 

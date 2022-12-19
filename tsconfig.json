@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "outDir": "./dist",
+        "outDir": "dist/server",
         "noImplicitAny": true,
         "target": "ES5",
         "allowJs": true,
@@ -9,10 +9,11 @@
         "strict": true,
         "experimentalDecorators": true,
         "noEmit": true,
-        "sourceMap": true
+        "sourceMap": true,
     },
     "files": [
-        "src/ts/main.ts"
+        "src/ts/main.ts",
+        "server/server.ts"
     ],
     "include": [
         "src/types/**/*"
