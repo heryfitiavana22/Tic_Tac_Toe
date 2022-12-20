@@ -6,13 +6,14 @@ var socket_io_1 = require("socket.io");
 var app = express();
 var httpServer = http.createServer(app);
 var io = new socket_io_1.Server(httpServer);
+var port = process.env.Port || 3000;
 app.set("view engine", "ejs");
 app.set("views", "dist");
 app.use(express.static("dist"));
 app.get("/", function (request, response) {
     response.render("./index");
 });
-var numberPlayer = 0, port = process.env.Port || 3000, currentRoom = 1;
+var numberPlayer = 0, currentRoom = 1;
 var listPlayer = [];
 io.on("connection", function (socket) {
     console.log("user connected");
@@ -118,3 +119,4 @@ function emitNewOpponent() {
     players = players.filter(function (e) { return e.isAvailable; });
     io.in("wait opponent").emit("new opponent", players);
 }
+//# sourceMappingURL=server.js.map

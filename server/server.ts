@@ -13,6 +13,7 @@ interface player {
 let app = express();
 let httpServer = http.createServer(app);
 let io = new Server(httpServer);
+const port = process.env.Port || 3000;
 
 app.set("view engine", "ejs");
 app.set("views", "dist");
@@ -23,7 +24,6 @@ app.get("/", (request, response) => {
 });
 
 let numberPlayer = 0,
-    port = process.env.Port || 3000,
     currentRoom = 1;
 
 let listPlayer: player[] = [];
