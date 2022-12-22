@@ -1,35 +1,40 @@
 import { io } from "socket.io-client";
-import { showAvailableOpponent, waitingForOpponent } from "./func";
+import TableGame from "./tableGame";
+import { showAvailableOpponent, waitingForOpponent } from "../func";
 
 class Socket {
     isActive = false;
-    isSocket = false;
+    isSocket = true;
     place = ""; // (home ou away)
     myName = "herydj";
     _currentRoom = "";
     _socket = io();
+    _tableGame: TableGame;
+    _container = document.querySelector(".container  > div") as HTMLDivElement;
 
-    init(tableGame: TableGame, circle: Point, croix: Point, socket: any) {
+    constructor(circle: Point, croix: Point) {
+        this._tableGame = new TableGame(3,3)
         this.emitStartGame();
-        this.onReady(tableGame);
+        this.onReady();
         this.waitingForOpponent();
         this.toActive();
         this.setCurrentPoint(circle, croix);
-        this.onDrawPoint(tableGame, circle, croix, socket);
-        this.onReset(tableGame, circle, croix);
-        this.onContinue(tableGame);
+        this.onDrawPoint(circle, croix);
+        this.onReset(circle, croix);
+        this.onContinue();
+        this.onClickCase()
     }
 
     emitStartGame() {
         this._socket.emit("start game");
     }
 
-    onReady(tableGame: TableGame) {
+    onReady() {
         this._socket.on("ready", (home, away, room) => {
             this._currentRoom = room;
             // console.log("ready");
             // console.log(`${home} vs ${away} in ${room}`);
-            tableGame.init();
+            this._tableGame.init();
         });
     }
 
@@ -84,22 +89,42 @@ class Socket {
         });
     }
 
+    onClickCase() {
+        this._container.onclick = (e: MouseEvent) => {
+            let target = e.target as HTMLDivElement,
+                coords = target.id.split(";"),
+                x = Number(coords[0]),
+                y = Number(coords[1]);
+        
+            // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
+            // et si on est autorisé de clické (si en ligne)
+            if (
+                !this.isActive ||
+                coords.length !== 2 ||
+                target.innerHTML.length > 0 ||
+                this._tableGame.getIsWinning
+            )
+                return;
+                
+            // on draw point
+            this.emitPoint(x, y)
+        }; 
+    }
+
     emitPoint(x: number, y: number) {
         this._socket.emit("set point", x, y, this._currentRoom);
     }
 
     onDrawPoint(
-        tableGame: TableGame,
         circle: Point,
         croix: Point,
-        socket: any
     ) {
         this._socket.on("draw point", (x: number, y: number) => {
-            tableGame.drawPoint(x, y);
-            tableGame.pushCoords(x, y);
-            tableGame.isWinning = tableGame.checkWinner();
+            this._tableGame.drawPoint(x, y);
+            this._tableGame.pushCoords(x, y);
+            this._tableGame.setIsWinning = this._tableGame.checkWinner();;
             // changement de joueur et verifier s'il a gagné
-            tableGame.permutation(circle, croix, socket);
+            this._tableGame.permutation(circle, croix, this);
         });
     }
 
@@ -118,9 +143,9 @@ class Socket {
         this._socket.emit("to reset", this._currentRoom);
     }
 
-    onReset(tableGame: TableGame, circle: Point, croix: Point) {
+    onReset(circle: Point, croix: Point) {
         this._socket.on("reset", () => {
-            tableGame.reset(circle, croix);
+            this._tableGame.reset(circle, croix);
             if (this.place === "home") {
                 this.isActive = true;
                 return;
@@ -133,9 +158,9 @@ class Socket {
         this._socket.emit("to continue", this._currentRoom);
     }
 
-    onContinue(tableGame: TableGame) {
+    onContinue() {
         this._socket.on("continue", () => {
-            tableGame.continue();
+            this._tableGame.continue();
         });
     }
 }

@@ -785,10 +785,52 @@ exports.showAvailableOpponent = showAvailableOpponent;
 
 /***/ }),
 
-/***/ "./src/ts/point.ts":
-/*!*************************!*\
-  !*** ./src/ts/point.ts ***!
-  \*************************/
+/***/ "./src/ts/models/LocalGame.ts":
+/*!************************************!*\
+  !*** ./src/ts/models/LocalGame.ts ***!
+  \************************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var tableGame_1 = __webpack_require__(/*! ./tableGame */ "./src/ts/models/tableGame.ts");
+var LocalGame = /** @class */ (function () {
+    function LocalGame(circle, croix) {
+        this._container = document.querySelector(".container  > div");
+        this._tableGame = new tableGame_1.default(3, 3);
+        this._tableGame.init();
+        this.onClickCase(circle, croix);
+    }
+    LocalGame.prototype.onClickCase = function (circle, croix) {
+        var _this = this;
+        this._container.onclick = function (e) {
+            var target = e.target, coords = target.id.split(";"), x = Number(coords[0]), y = Number(coords[1]);
+            // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
+            // et si on est autorisé de clické (si en ligne)
+            if (coords.length !== 2 ||
+                target.innerHTML.length > 0 ||
+                _this._tableGame.getIsWinning)
+                return;
+            console.log("not socket");
+            _this._tableGame.drawPoint(x, y);
+            _this._tableGame.pushCoords(x, y);
+            _this._tableGame.setIsWinning = _this._tableGame.checkWinner();
+            // changement de joueur et verifier s'il a gagné
+            _this._tableGame.permutation(circle, croix);
+        };
+    };
+    return LocalGame;
+}());
+exports["default"] = LocalGame;
+
+
+/***/ }),
+
+/***/ "./src/ts/models/point.ts":
+/*!********************************!*\
+  !*** ./src/ts/models/point.ts ***!
+  \********************************/
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -816,46 +858,48 @@ exports["default"] = Point;
 
 /***/ }),
 
-/***/ "./src/ts/socket.ts":
-/*!**************************!*\
-  !*** ./src/ts/socket.ts ***!
-  \**************************/
+/***/ "./src/ts/models/socket.ts":
+/*!*********************************!*\
+  !*** ./src/ts/models/socket.ts ***!
+  \*********************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var socket_io_client_1 = __webpack_require__(/*! socket.io-client */ "./node_modules/.pnpm/socket.io-client@4.5.4/node_modules/socket.io-client/build/cjs/index.js");
-var func_1 = __webpack_require__(/*! ./func */ "./src/ts/func.ts");
+var tableGame_1 = __webpack_require__(/*! ./tableGame */ "./src/ts/models/tableGame.ts");
+var func_1 = __webpack_require__(/*! ../func */ "./src/ts/func.ts");
 var Socket = /** @class */ (function () {
-    function Socket() {
+    function Socket(circle, croix) {
         this.isActive = false;
-        this.isSocket = false;
+        this.isSocket = true;
         this.place = ""; // (home ou away)
         this.myName = "herydj";
         this._currentRoom = "";
         this._socket = (0, socket_io_client_1.io)();
-    }
-    Socket.prototype.init = function (tableGame, circle, croix, socket) {
+        this._container = document.querySelector(".container  > div");
+        this._tableGame = new tableGame_1.default(3, 3);
         this.emitStartGame();
-        this.onReady(tableGame);
+        this.onReady();
         this.waitingForOpponent();
         this.toActive();
         this.setCurrentPoint(circle, croix);
-        this.onDrawPoint(tableGame, circle, croix, socket);
-        this.onReset(tableGame, circle, croix);
-        this.onContinue(tableGame);
-    };
+        this.onDrawPoint(circle, croix);
+        this.onReset(circle, croix);
+        this.onContinue();
+        this.onClickCase();
+    }
     Socket.prototype.emitStartGame = function () {
         this._socket.emit("start game");
     };
-    Socket.prototype.onReady = function (tableGame) {
+    Socket.prototype.onReady = function () {
         var _this = this;
         this._socket.on("ready", function (home, away, room) {
             _this._currentRoom = room;
             // console.log("ready");
             // console.log(`${home} vs ${away} in ${room}`);
-            tableGame.init();
+            _this._tableGame.init();
         });
     };
     Socket.prototype.waitingForOpponent = function () {
@@ -898,16 +942,33 @@ var Socket = /** @class */ (function () {
             currentPlayerHTML.innerHTML = croix.pointHTML;
         });
     };
+    Socket.prototype.onClickCase = function () {
+        var _this = this;
+        this._container.onclick = function (e) {
+            var target = e.target, coords = target.id.split(";"), x = Number(coords[0]), y = Number(coords[1]);
+            // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
+            // et si on est autorisé de clické (si en ligne)
+            if (!_this.isActive ||
+                coords.length !== 2 ||
+                target.innerHTML.length > 0 ||
+                _this._tableGame.getIsWinning)
+                return;
+            // on draw point
+            _this.emitPoint(x, y);
+        };
+    };
     Socket.prototype.emitPoint = function (x, y) {
         this._socket.emit("set point", x, y, this._currentRoom);
     };
-    Socket.prototype.onDrawPoint = function (tableGame, circle, croix, socket) {
+    Socket.prototype.onDrawPoint = function (circle, croix) {
+        var _this = this;
         this._socket.on("draw point", function (x, y) {
-            tableGame.drawPoint(x, y);
-            tableGame.pushCoords(x, y);
-            tableGame.isWinning = tableGame.checkWinner();
+            _this._tableGame.drawPoint(x, y);
+            _this._tableGame.pushCoords(x, y);
+            _this._tableGame.setIsWinning = _this._tableGame.checkWinner();
+            ;
             // changement de joueur et verifier s'il a gagné
-            tableGame.permutation(circle, croix, socket);
+            _this._tableGame.permutation(circle, croix, _this);
         });
     };
     Socket.prototype.toActive = function () {
@@ -924,10 +985,10 @@ var Socket = /** @class */ (function () {
     Socket.prototype.emitReset = function () {
         this._socket.emit("to reset", this._currentRoom);
     };
-    Socket.prototype.onReset = function (tableGame, circle, croix) {
+    Socket.prototype.onReset = function (circle, croix) {
         var _this = this;
         this._socket.on("reset", function () {
-            tableGame.reset(circle, croix);
+            _this._tableGame.reset(circle, croix);
             if (_this.place === "home") {
                 _this.isActive = true;
                 return;
@@ -938,9 +999,10 @@ var Socket = /** @class */ (function () {
     Socket.prototype.emitContinue = function () {
         this._socket.emit("to continue", this._currentRoom);
     };
-    Socket.prototype.onContinue = function (tableGame) {
+    Socket.prototype.onContinue = function () {
+        var _this = this;
         this._socket.on("continue", function () {
-            tableGame.continue();
+            _this._tableGame.continue();
         });
     };
     return Socket;
@@ -950,10 +1012,10 @@ exports["default"] = Socket;
 
 /***/ }),
 
-/***/ "./src/ts/tableGame.ts":
-/*!*****************************!*\
-  !*** ./src/ts/tableGame.ts ***!
-  \*****************************/
+/***/ "./src/ts/models/tableGame.ts":
+/*!************************************!*\
+  !*** ./src/ts/models/tableGame.ts ***!
+  \************************************/
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -961,18 +1023,18 @@ exports["default"] = Socket;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var TableGame = /** @class */ (function () {
     function TableGame(x, y) {
-        this.currentPlayer = 1;
-        this.isWinning = false;
+        this._currentPlayer = 1;
+        this._isWinning = false;
         // currentPoint: Point = circle;
-        this.currentPointHTML = '<span class="point circle"></span>';
-        this.currentPlayerHTML = document.querySelector(".current-player");
+        this._currentPointHTML = '<span class="point circle"></span>';
+        this._currentPlayerHTML = document.querySelector(".current-player");
         // matrice d'adjacence qui represente le table (1 => player1; 2 => player2; 0 => case vide)
         this._adjacentMatrix = [];
-        this.dimensionX = x;
-        this.dimensionY = y;
+        this._dimensionX = x;
+        this._dimensionY = y;
     }
     TableGame.prototype.init = function () {
-        this.isWinning = false;
+        this._isWinning = false;
         this._adjacentMatrix = [];
         this.createAdjacentMatrix();
         this.drawTable();
@@ -981,8 +1043,8 @@ var TableGame = /** @class */ (function () {
     };
     TableGame.prototype.drawTable = function () {
         var casesHTML = "";
-        for (var i = 0; i < this.dimensionX; i++) {
-            for (var j = 0; j < this.dimensionY; j++) {
+        for (var i = 0; i < this._dimensionX; i++) {
+            for (var j = 0; j < this._dimensionY; j++) {
                 casesHTML += "<div class=\"case\" id=\"".concat(i, ";").concat(j, "\"></div>");
             }
         }
@@ -990,29 +1052,43 @@ var TableGame = /** @class */ (function () {
             casesHTML;
     };
     TableGame.prototype.createAdjacentMatrix = function () {
-        for (var i = 0; i < this.dimensionX; i++) {
+        for (var i = 0; i < this._dimensionX; i++) {
             this._adjacentMatrix.push([0, 0, 0]);
         }
     };
     TableGame.prototype.pushCoords = function (x, y) {
-        this._adjacentMatrix[x][y] = this.currentPlayer;
+        this._adjacentMatrix[x][y] = this._currentPlayer;
         // console.log(this.adjacentMatrix);
     };
     TableGame.prototype.drawPoint = function (x, y) {
         var caseHTML = document.getElementById("".concat(x, ";").concat(y));
-        caseHTML.innerHTML = this.currentPointHTML;
+        caseHTML.innerHTML = this._currentPointHTML;
         caseHTML.style.cursor = "not-allowed";
     };
     TableGame.prototype.showResult = function (isDraw) {
         var resultHTML = document.querySelector(".result");
-        resultHTML.innerHTML = "\n            <div class=\"winner\">".concat(isDraw ? "DRAW !!" : "PLAYER ".concat(this.currentPlayer, " WON !"), "</div>\n            <div class=\"btn-container\">\n                <button class=\"reset\">Reset</button>\n                <button class=\"continue\">Continue</button>\n            </div>");
+        resultHTML.innerHTML = "\n            <div class=\"winner\">".concat(isDraw ? "DRAW !!" : "PLAYER ".concat(this._currentPlayer, " WON !"), "</div>\n            <div class=\"btn-container\">\n                <button class=\"reset\">Reset</button>\n                <button class=\"continue\">Continue</button>\n            </div>");
         // attendre pour afficher un peu la ligne
         setTimeout(function () {
             resultHTML.style.transform = "scale(1)";
         }, 500);
     };
+    Object.defineProperty(TableGame.prototype, "getIsWinning", {
+        get: function () {
+            return this._isWinning;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(TableGame.prototype, "setIsWinning", {
+        set: function (value) {
+            this._isWinning = value;
+        },
+        enumerable: false,
+        configurable: true
+    });
     TableGame.prototype.checkWinner = function () {
-        var p = this.currentPlayer;
+        var p = this._currentPlayer;
         // convertir la matrice d'adjacence en string pour faciliter la verification
         // ex : 1,0,0,1,0,0,1,0,0 => 100100100
         var coords = this._adjacentMatrix.toString().split(",").join(""), 
@@ -1030,12 +1106,12 @@ var TableGame = /** @class */ (function () {
             var _loop_1 = function (i) {
                 var colValue = [], 
                 // 1,1,1 ou 2,2,2
-                sequence = this_1.currentPlayer
+                sequence = this_1._currentPlayer
                     .toString()
                     .repeat(3)
                     .split("")
                     .join(",");
-                for (var j = 0; j < this_1.dimensionX; j++) {
+                for (var j = 0; j < this_1._dimensionX; j++) {
                     colValue.push(this_1._adjacentMatrix[j][i]);
                 }
                 if (colValue.toString() === sequence) {
@@ -1054,7 +1130,7 @@ var TableGame = /** @class */ (function () {
             };
             var this_1 = this;
             // chercher l'indice de depart pour tracer la ligne
-            for (var i = 0; i < this.dimensionX; i++) {
+            for (var i = 0; i < this._dimensionX; i++) {
                 var state_1 = _loop_1(i);
                 if (typeof state_1 === "object")
                     return state_1.value;
@@ -1065,7 +1141,7 @@ var TableGame = /** @class */ (function () {
             console.log("winner circle row" + p);
             var _loop_2 = function (i) {
                 // 1,1,1 ou 2,2,2
-                var sequence = this_2.currentPlayer
+                var sequence = this_2._currentPlayer
                     .toString()
                     .repeat(3)
                     .split("")
@@ -1086,7 +1162,7 @@ var TableGame = /** @class */ (function () {
                 }
             };
             var this_2 = this;
-            for (var i = 0; i < this.dimensionX; i++) {
+            for (var i = 0; i < this._dimensionX; i++) {
                 var state_2 = _loop_2(i);
                 if (typeof state_2 === "object")
                     return state_2.value;
@@ -1132,9 +1208,9 @@ var TableGame = /** @class */ (function () {
     };
     TableGame.prototype.reset = function (circle, croix) {
         this.init();
-        this.currentPlayer = 1;
-        this.currentPointHTML = circle.pointHTML;
-        this.currentPlayerHTML.innerHTML = circle.pointHTML;
+        this._currentPlayer = 1;
+        this._currentPointHTML = circle.pointHTML;
+        this._currentPlayerHTML.innerHTML = circle.pointHTML;
         circle.init();
         croix.init();
         var resultHTML = document.querySelector(".result");
@@ -1149,23 +1225,23 @@ var TableGame = /** @class */ (function () {
     };
     TableGame.prototype.permutation = function (circle, croix, socket) {
         // player 1 : circle; player 2: croix
-        // change currentPlayer and currentPointHTML
-        if (this.currentPlayer === 1) {
-            this.currentPlayer = 2;
-            this.currentPointHTML = croix.pointHTML;
-            this.currentPlayerHTML.innerHTML = croix.pointHTML;
+        // change _currentPlayer and _currentPointHTML
+        if (this._currentPlayer === 1) {
+            this._currentPlayer = 2;
+            this._currentPointHTML = croix.pointHTML;
+            this._currentPlayerHTML.innerHTML = croix.pointHTML;
             // si gagnant
-            if (this.isWinning) {
+            if (this._isWinning) {
                 circle.win();
                 this.btnResult(circle, croix, socket);
             }
         }
         else {
-            this.currentPlayer = 1;
-            this.currentPointHTML = circle.pointHTML;
-            this.currentPlayerHTML.innerHTML = circle.pointHTML;
+            this._currentPlayer = 1;
+            this._currentPointHTML = circle.pointHTML;
+            this._currentPlayerHTML.innerHTML = circle.pointHTML;
             // si gagnant
-            if (this.isWinning) {
+            if (this._isWinning) {
                 croix.win();
                 this.btnResult(circle, croix, socket);
             }
@@ -5419,53 +5495,29 @@ var exports = __webpack_exports__;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 __webpack_require__(/*! ../css/style.css */ "./src/css/style.css");
-var tableGame_1 = __webpack_require__(/*! ./tableGame */ "./src/ts/tableGame.ts");
-var point_1 = __webpack_require__(/*! ./point */ "./src/ts/point.ts");
-var socket_1 = __webpack_require__(/*! ./socket */ "./src/ts/socket.ts");
-(function () {
-    var btnLocal = document.querySelector("#local"), btnOnline = document.querySelector("#online");
-    var tableGame = new tableGame_1.default(3, 3), circle = new point_1.default('player1', '<span class="point circle"></span>'), croix = new point_1.default('player2', '<span class="point croix"></span>');
-    var container = document.querySelector(".container  > div");
-    var socket = new socket_1.default();
-    btnLocal.onclick = function (e) {
-        socket.isSocket = false;
-        socket.isActive = true;
-        // init table game
-        tableGame.init();
-        start();
-    };
-    btnOnline.onclick = function (e) {
-        socket.init(tableGame, circle, croix, socket);
-        socket.isSocket = true;
-        // init table game
-        tableGame.init();
-        start();
-    };
-    function start() {
-        container.onclick = function (e) {
-            var target = e.target, coords = target.id.split(";"), x = Number(coords[0]), y = Number(coords[1]);
-            // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
-            // et si on est autorisé de clické (si en ligne)
-            if (!socket.isActive ||
-                target.innerHTML.length > 0 ||
-                coords.length !== 2 ||
-                tableGame.isWinning)
-                return;
-            // emit point to server if socket
-            if (socket.isSocket) {
-                // on draw point
-                socket.emitPoint(x, y);
-                return;
-            }
-            console.log("not socket");
-            tableGame.drawPoint(x, y);
-            tableGame.pushCoords(x, y);
-            tableGame.isWinning = tableGame.checkWinner();
-            // changement de joueur et verifier s'il a gagné
-            tableGame.permutation(circle, croix);
-        };
+var point_1 = __webpack_require__(/*! ./models/point */ "./src/ts/models/point.ts");
+var socket_1 = __webpack_require__(/*! ./models/socket */ "./src/ts/models/socket.ts");
+var LocalGame_1 = __webpack_require__(/*! ./models/LocalGame */ "./src/ts/models/LocalGame.ts");
+var App = /** @class */ (function () {
+    function App() {
+        this._btnLocal = document.querySelector("#local");
+        this._btnOnline = document.querySelector("#online");
+        this._circle = new point_1.default('player1', '<span class="point circle"></span>'),
+            this._croix = new point_1.default('player2', '<span class="point croix"></span>');
     }
-})();
+    App.prototype.main = function () {
+        var _this = this;
+        this._btnLocal.onclick = function (e) {
+            var localGame = new LocalGame_1.default(_this._circle, _this._croix);
+        };
+        this._btnOnline.onclick = function (e) {
+            var socket = new socket_1.default(_this._circle, _this._croix);
+        };
+    };
+    return App;
+}());
+var app = new App();
+app.main();
 
 })();
 

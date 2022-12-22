@@ -125,6 +125,7 @@ io.on("connection", (socket) => {
         })
         // remove the player disconnected 
         listPlayer = listPlayer.filter(e => e.id !== socket.id)  
+        emitNewOpponent()
     });
 });
 

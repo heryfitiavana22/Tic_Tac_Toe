@@ -17,13 +17,13 @@ declare class Point {
 }
 
 declare class TableGame {
-    currentPlayer: number;
-    dimensionX: number;
-    dimensionY: number;
-    isWinning: boolean;
-    currentPointHTML: string;
-    currentPlayerHTML: HTMLElement;
-    _adjacentMatrix: AdjacentMatrix;
+    private _currentPlayer: number;
+    private _dimensionX: number;
+    private _dimensionY: number;
+    private _isWinning: boolean;
+    private _currentPointHTML: string;
+    private _currentPlayerHTML: HTMLElement;
+    private _adjacentMatrix: AdjacentMatrix;
     init(): void;
     drawTable(): void;
     createAdjacentMatrix(): void;
@@ -35,6 +35,8 @@ declare class TableGame {
     continue(): void;
     permutation(circle: Point, croix: Point, socket?: SocketType): void;
     btnResult(circle: Point, croix: Point): void;
+    get getIsWinning(): boolean
+    set setIsWinning(value: boolean)
 }
 
 declare class SocketType {
