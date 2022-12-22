@@ -31,3 +31,13 @@ export function showAvailableOpponent(list: player[]): HTMLUListElement {
     ul.innerHTML = listHTML
     return ul
 }
+
+export function setMessage(message: string) {
+    let messageHTML = document.querySelector(".message") as HTMLParagraphElement
+    messageHTML.innerHTML = message
+    messageHTML.style.opacity = "1"
+    setTimeout(() => {
+        messageHTML.style.opacity = "0"
+        messageHTML.innerHTML = ""
+    }, 1000)
+}

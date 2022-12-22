@@ -65,7 +65,8 @@ io.on("connection", function (socket) {
         currentRoom++;
     });
     socket.on("set point", function (x, y, room) {
-        io.in(room).emit("to active");
+        // emmettre à l'adversaire que c'est son tour
+        socket.broadcast.in(room).emit("to active");
         io.in(room).emit("draw point", x, y);
     });
     socket.on("to reset", function (room) {
@@ -101,6 +102,7 @@ io.on("connection", function (socket) {
         });
         // remove the player disconnected 
         listPlayer = listPlayer.filter(function (e) { return e.id !== socket.id; });
+        emitNewOpponent();
     });
 });
 httpServer.listen(port, function () {

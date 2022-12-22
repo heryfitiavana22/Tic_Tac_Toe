@@ -2,6 +2,7 @@ import * as path from 'path';
 import {Configuration} from 'webpack';
 import * as HtmlWebpackPlugin from 'html-webpack-plugin';
 import * as MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import * as TerserWebpackPlugin from 'terser-webpack-plugin';
 import common from "./webpack.common"
 import {merge} from "webpack-merge"
 
@@ -26,7 +27,7 @@ let configProd: Configuration = {
     optimization: {
         minimize: true,
         minimizer: [
-
+            new TerserWebpackPlugin()
         ]
     }
 }

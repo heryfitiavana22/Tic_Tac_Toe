@@ -1,35 +1,39 @@
 import { io } from "socket.io-client";
-import { showAvailableOpponent, waitingForOpponent } from "./func";
+import TableGame from "./tableGame";
+import { showAvailableOpponent, waitingForOpponent, setMessage } from "../func";
 
 class Socket {
-    isActive = false;
-    isSocket = false;
-    place = ""; // (home ou away)
-    myName = "herydj";
-    _currentRoom = "";
-    _socket = io();
+    private _isActive = false;
+    private _isSocket = true;
+    private _place = ""; // (home ou away)
+    private _myName = "herydj";
+    private _currentRoom = "";
+    private _socket = io();
+    private _tableGame: TableGame;
+    private _container = document.querySelector(".container  > div") as HTMLDivElement;
 
-    init(tableGame: TableGame, circle: Point, croix: Point, socket: any) {
+    constructor(circle: Point, croix: Point) {
+        this._tableGame = new TableGame(3,3)
         this.emitStartGame();
-        this.onReady(tableGame);
+        this.onReady();
         this.waitingForOpponent();
         this.toActive();
         this.setCurrentPoint(circle, croix);
-        this.onDrawPoint(tableGame, circle, croix, socket);
-        this.onReset(tableGame, circle, croix);
-        this.onContinue(tableGame);
+        this.onDrawPoint(circle, croix);
+        this.onReset(circle, croix);
+        this.onContinue();
     }
 
     emitStartGame() {
         this._socket.emit("start game");
     }
 
-    onReady(tableGame: TableGame) {
+    onReady() {
         this._socket.on("ready", (home, away, room) => {
             this._currentRoom = room;
             // console.log("ready");
             // console.log(`${home} vs ${away} in ${room}`);
-            tableGame.init();
+            this._tableGame.init();
         });
     }
 
@@ -39,7 +43,7 @@ class Socket {
             // console.log("waiting opponent");
             waitingForOpponent()
             // home (admettons)
-            this.isActive = true;
+            this._isActive = true;
             this._currentRoom = rooms;
         });
 
@@ -61,27 +65,53 @@ class Socket {
                 // changer le "room" par le "room" de l'adversaire
                 this._currentRoom = `room${idRoom}`;
                 animation.classList.remove("loading");
+                // activé le "click" au container
             };
+            this.onClickCase()
         });
     }
 
     setCurrentPoint(circle: Point, croix: Point) {
-        let currentPlayerHTML = document.querySelector(
-            ".current-player"
-        ) as HTMLElement;
+        let currentPlayerHTML = document.querySelector(".current-player") as HTMLElement;
+
         this._socket.on("home", () => {
             // console.log("home");
-            this.place = "home";
-            this.isActive = true;
+            this._place = "home";
+            this._isActive = true;
             currentPlayerHTML.innerHTML = circle.pointHTML;
         });
 
         this._socket.on("away", () => {
             // console.log("away");
-            this.place = "away";
-            this.isActive = false;
+            this._place = "away";
+            this._isActive = false;
             currentPlayerHTML.innerHTML = croix.pointHTML;
         });
+    }
+
+    onClickCase() {
+        this._container.onclick = (e: MouseEvent) => {
+            let target = e.target as HTMLDivElement,
+                coords = target.id.split(";"),
+                x = Number(coords[0]),
+                y = Number(coords[1]);
+            
+            // et si on est autorisé de clické (si en ligne)
+            if(!this._isActive) return setMessage("C'est le tour de votre adversaire")
+            
+            // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
+            if (
+                coords.length !== 2 ||
+                target.innerHTML.length > 0 ||
+                this._tableGame.getIsWinning
+            )
+                return;
+                
+            // on draw point        
+            this.emitPoint(x, y)
+            // mettre le joueur qui a clické en "non active" (tour de l'adversaire)
+            this._isActive = false;
+        }; 
     }
 
     emitPoint(x: number, y: number) {
@@ -89,28 +119,23 @@ class Socket {
     }
 
     onDrawPoint(
-        tableGame: TableGame,
         circle: Point,
         croix: Point,
-        socket: any
     ) {
         this._socket.on("draw point", (x: number, y: number) => {
-            tableGame.drawPoint(x, y);
-            tableGame.pushCoords(x, y);
-            tableGame.isWinning = tableGame.checkWinner();
+            this._tableGame.drawPoint(x, y);
+            this._tableGame.pushCoords(x, y);
+            this._tableGame.setIsWinning = this._tableGame.checkWinner();;
             // changement de joueur et verifier s'il a gagné
-            tableGame.permutation(circle, croix, socket);
+            this._tableGame.permutation(circle, croix, this);
         });
     }
 
     toActive() {
         this._socket.on("to active", () => {
-            // permutation (mettre l'autre joueur active)
-            if (this.isActive) {
-                this.isActive = false;
-                return;
-            }
-            this.isActive = true;
+            console.log("to active");
+            
+            this._isActive = true;
         });
     }
 
@@ -118,14 +143,14 @@ class Socket {
         this._socket.emit("to reset", this._currentRoom);
     }
 
-    onReset(tableGame: TableGame, circle: Point, croix: Point) {
+    onReset(circle: Point, croix: Point) {
         this._socket.on("reset", () => {
-            tableGame.reset(circle, croix);
-            if (this.place === "home") {
-                this.isActive = true;
+            this._tableGame.reset(circle, croix);
+            if (this._place === "home") {
+                this._isActive = true;
                 return;
             }
-            this.isActive = false;
+            this._isActive = false;
         });
     }
 
@@ -133,9 +158,9 @@ class Socket {
         this._socket.emit("to continue", this._currentRoom);
     }
 
-    onContinue(tableGame: TableGame) {
+    onContinue() {
         this._socket.on("continue", () => {
-            tableGame.continue();
+            this._tableGame.continue();
         });
     }
 }
