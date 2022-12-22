@@ -758,7 +758,7 @@ function plural(ms, msAbs, n, name) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.showAvailableOpponent = exports.waitingForOpponent = void 0;
+exports.setMessage = exports.showAvailableOpponent = exports.waitingForOpponent = void 0;
 function waitingForOpponent() {
     var container = document.querySelector(".container  > div");
     container.className = "wait-opponent";
@@ -781,6 +781,182 @@ function showAvailableOpponent(list) {
     return ul;
 }
 exports.showAvailableOpponent = showAvailableOpponent;
+function setMessage(message) {
+    var messageHTML = document.querySelector(".message");
+    messageHTML.innerHTML = message;
+    messageHTML.style.opacity = "1";
+    setTimeout(function () {
+        messageHTML.style.opacity = "0";
+        messageHTML.innerHTML = "";
+    }, 1000);
+}
+exports.setMessage = setMessage;
+
+
+/***/ }),
+
+/***/ "./src/ts/models/CheckWinning.ts":
+/*!***************************************!*\
+  !*** ./src/ts/models/CheckWinning.ts ***!
+  \***************************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var CheckWinning = /** @class */ (function () {
+    function CheckWinning(x, y) {
+        this._adjacentMatrix = [];
+        this._currentPlayer = 1;
+        this._stringMatrix = "";
+        this._dimensionX = x;
+        this._dimensionY = y;
+    }
+    Object.defineProperty(CheckWinning.prototype, "setAdjacentMatrix", {
+        set: function (adjacentMatrix) {
+            this._adjacentMatrix = adjacentMatrix;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(CheckWinning.prototype, "setCurrentPlayer", {
+        set: function (currentPlayer) {
+            this._currentPlayer = currentPlayer;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(CheckWinning.prototype, "setStringMatrix", {
+        set: function (stringMatrix) {
+            this._stringMatrix = stringMatrix;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    CheckWinning.prototype.checkColumn = function () {
+        var p = this._currentPlayer, col = new RegExp("(2|1|0){0,2}[".concat(p, "](2|1|0){2}[").concat(p, "](2|1|0){2}[").concat(p, "](2|1|0){0,2}"));
+        if (col.test(this._stringMatrix)) {
+            var _loop_1 = function (i) {
+                var colValue = [], 
+                // 1,1,1 ou 2,2,2
+                sequence = this_1._currentPlayer
+                    .toString()
+                    .repeat(3)
+                    .split("")
+                    .join(",");
+                for (var j = 0; j < this_1._dimensionX; j++) {
+                    colValue.push(this_1._adjacentMatrix[j][i]);
+                }
+                if (colValue.toString() === sequence) {
+                    // i correspond à la colonne
+                    var beginCaseHTML = document.getElementById("".concat(0, ";").concat(i));
+                    beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line col"></span>');
+                    var line_1 = document.querySelector(".line");
+                    // animation
+                    setTimeout(function () {
+                        line_1.style.height = "300px";
+                    }, 10);
+                    return { value: true };
+                }
+            };
+            var this_1 = this;
+            // console.log("winner circle col" + p);
+            // chercher l'indice de depart pour tracer la ligne
+            for (var i = 0; i < this._dimensionX; i++) {
+                var state_1 = _loop_1(i);
+                if (typeof state_1 === "object")
+                    return state_1.value;
+            }
+        }
+        return false;
+    };
+    CheckWinning.prototype.checkRow = function () {
+        var p = this._currentPlayer, 
+        // ex : 111000000, 000111000, 000000111 (1 => player1; 2 => player2; 0 => case vide)
+        row = new RegExp("([".concat(p, "]{3}(2|1|0){6})|((2|1|0){3}[").concat(p, "]{3}(2|1|0){3})|((2|1|0){6}[").concat(p, "]{3})"));
+        if (row.test(this._stringMatrix)) {
+            var _loop_2 = function (i) {
+                // 1,1,1 ou 2,2,2
+                var sequence = this_2._currentPlayer
+                    .toString()
+                    .repeat(3)
+                    .split("")
+                    .join(",");
+                // prendre la ligne en un coup avec this.adjacentMatrix[i]
+                if (this_2._adjacentMatrix[i].toString() === sequence) {
+                    // i correspond à la ligne
+                    var beginCaseHTML = document.getElementById("".concat(i, ";").concat(0));
+                    beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line row"></span>');
+                    var line_2 = document.querySelector(".line");
+                    // animation
+                    setTimeout(function () {
+                        line_2.style.width = "300px";
+                    }, 10);
+                    return { value: true };
+                }
+            };
+            var this_2 = this;
+            // console.log("winner circle row" + p);
+            for (var i = 0; i < this._dimensionX; i++) {
+                var state_2 = _loop_2(i);
+                if (typeof state_2 === "object")
+                    return state_2.value;
+            }
+        }
+        return false;
+    };
+    CheckWinning.prototype.checkDiagonal = function () {
+        var p = this._currentPlayer, 
+        // ex : 100010001 (1 => player1; 2 => player2; 0 => case vide)
+        diagonal = new RegExp("[".concat(p, "](2|1|0){3}[").concat(p, "](2|1|0){3}[").concat(p, "]"));
+        if (diagonal.test(this._stringMatrix)) {
+            // console.log("winner circle diagonal" + p);
+            // depart 0;0
+            var beginCaseHTML = document.getElementById("0;0");
+            beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line rotate"></span>');
+            var line_3 = document.querySelector(".line");
+            // animation
+            setTimeout(function () {
+                line_3.style.width = "414px";
+            }, 10);
+            // display result
+            // this.showResult(false);
+            return true;
+        }
+        return false;
+    };
+    CheckWinning.prototype.checkContreDiagonal = function () {
+        var p = this._currentPlayer, 
+        // ex : 001010100 (1 => player1; 2 => player2; 0 => case vide)
+        contreDiagonal = new RegExp("(2|1|0){2}[".concat(p, "](2|1|0){1}[").concat(p, "](2|1|0){1}[").concat(p, "](2|1|0){2}"));
+        if (contreDiagonal.test(this._stringMatrix)) {
+            console.log("winner circle contrediagonal" + p);
+            // 0;2
+            var beginCaseHTML = document.getElementById("0;2");
+            beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line rotate contre"></span>');
+            var line_4 = document.querySelector(".line");
+            // animation
+            setTimeout(function () {
+                line_4.style.width = "414px";
+            }, 10);
+            // display result
+            // this.showResult(false);
+            return true;
+        }
+        return false;
+    };
+    CheckWinning.prototype.checkDraw = function () {
+        // au cas où il n'y a plus de case vide mais pas de vainquer
+        if (!this._stringMatrix.includes("0")) {
+            console.log("draw");
+            // display result
+            // this.showResult(true);
+            return true;
+        }
+    };
+    return CheckWinning;
+}());
+exports["default"] = CheckWinning;
 
 
 /***/ }),
@@ -812,7 +988,7 @@ var LocalGame = /** @class */ (function () {
                 target.innerHTML.length > 0 ||
                 _this._tableGame.getIsWinning)
                 return;
-            console.log("not socket");
+            // console.log("not socket");
             _this._tableGame.drawPoint(x, y);
             _this._tableGame.pushCoords(x, y);
             _this._tableGame.setIsWinning = _this._tableGame.checkWinner();
@@ -872,10 +1048,10 @@ var tableGame_1 = __webpack_require__(/*! ./tableGame */ "./src/ts/models/tableG
 var func_1 = __webpack_require__(/*! ../func */ "./src/ts/func.ts");
 var Socket = /** @class */ (function () {
     function Socket(circle, croix) {
-        this.isActive = false;
-        this.isSocket = true;
-        this.place = ""; // (home ou away)
-        this.myName = "herydj";
+        this._isActive = false;
+        this._isSocket = true;
+        this._place = ""; // (home ou away)
+        this._myName = "herydj";
         this._currentRoom = "";
         this._socket = (0, socket_io_client_1.io)();
         this._container = document.querySelector(".container  > div");
@@ -888,7 +1064,6 @@ var Socket = /** @class */ (function () {
         this.onDrawPoint(circle, croix);
         this.onReset(circle, croix);
         this.onContinue();
-        this.onClickCase();
     }
     Socket.prototype.emitStartGame = function () {
         this._socket.emit("start game");
@@ -909,7 +1084,7 @@ var Socket = /** @class */ (function () {
             // console.log("waiting opponent");
             (0, func_1.waitingForOpponent)();
             // home (admettons)
-            _this.isActive = true;
+            _this._isActive = true;
             _this._currentRoom = rooms;
         });
         this._socket.on("new opponent", function (listPlayer) {
@@ -923,7 +1098,9 @@ var Socket = /** @class */ (function () {
                 // changer le "room" par le "room" de l'adversaire
                 _this._currentRoom = "room".concat(idRoom);
                 animation.classList.remove("loading");
+                // activé le "click" au container
             };
+            _this.onClickCase();
         });
     };
     Socket.prototype.setCurrentPoint = function (circle, croix) {
@@ -931,14 +1108,14 @@ var Socket = /** @class */ (function () {
         var currentPlayerHTML = document.querySelector(".current-player");
         this._socket.on("home", function () {
             // console.log("home");
-            _this.place = "home";
-            _this.isActive = true;
+            _this._place = "home";
+            _this._isActive = true;
             currentPlayerHTML.innerHTML = circle.pointHTML;
         });
         this._socket.on("away", function () {
             // console.log("away");
-            _this.place = "away";
-            _this.isActive = false;
+            _this._place = "away";
+            _this._isActive = false;
             currentPlayerHTML.innerHTML = croix.pointHTML;
         });
     };
@@ -946,15 +1123,18 @@ var Socket = /** @class */ (function () {
         var _this = this;
         this._container.onclick = function (e) {
             var target = e.target, coords = target.id.split(";"), x = Number(coords[0]), y = Number(coords[1]);
-            // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
             // et si on est autorisé de clické (si en ligne)
-            if (!_this.isActive ||
-                coords.length !== 2 ||
+            if (!_this._isActive)
+                return (0, func_1.setMessage)("C'est le tour de votre adversaire");
+            // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
+            if (coords.length !== 2 ||
                 target.innerHTML.length > 0 ||
                 _this._tableGame.getIsWinning)
                 return;
-            // on draw point
+            // on draw point        
             _this.emitPoint(x, y);
+            // mettre le joueur qui a clické en "non active" (tour de l'adversaire)
+            _this._isActive = false;
         };
     };
     Socket.prototype.emitPoint = function (x, y) {
@@ -974,12 +1154,8 @@ var Socket = /** @class */ (function () {
     Socket.prototype.toActive = function () {
         var _this = this;
         this._socket.on("to active", function () {
-            // permutation (mettre l'autre joueur active)
-            if (_this.isActive) {
-                _this.isActive = false;
-                return;
-            }
-            _this.isActive = true;
+            console.log("to active");
+            _this._isActive = true;
         });
     };
     Socket.prototype.emitReset = function () {
@@ -989,11 +1165,11 @@ var Socket = /** @class */ (function () {
         var _this = this;
         this._socket.on("reset", function () {
             _this._tableGame.reset(circle, croix);
-            if (_this.place === "home") {
-                _this.isActive = true;
+            if (_this._place === "home") {
+                _this._isActive = true;
                 return;
             }
-            _this.isActive = false;
+            _this._isActive = false;
         });
     };
     Socket.prototype.emitContinue = function () {
@@ -1016,11 +1192,13 @@ exports["default"] = Socket;
 /*!************************************!*\
   !*** ./src/ts/models/tableGame.ts ***!
   \************************************/
-/***/ ((__unused_webpack_module, exports) => {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+var func_1 = __webpack_require__(/*! ../func */ "./src/ts/func.ts");
+var CheckWinning_1 = __webpack_require__(/*! ./CheckWinning */ "./src/ts/models/CheckWinning.ts");
 var TableGame = /** @class */ (function () {
     function TableGame(x, y) {
         this._currentPlayer = 1;
@@ -1032,6 +1210,7 @@ var TableGame = /** @class */ (function () {
         this._adjacentMatrix = [];
         this._dimensionX = x;
         this._dimensionY = y;
+        this._checkWinning = new CheckWinning_1.default(x, y);
     }
     TableGame.prototype.init = function () {
         this._isWinning = false;
@@ -1088,119 +1267,19 @@ var TableGame = /** @class */ (function () {
         configurable: true
     });
     TableGame.prototype.checkWinner = function () {
-        var p = this._currentPlayer;
+        this._checkWinning.setAdjacentMatrix = this._adjacentMatrix;
+        this._checkWinning.setCurrentPlayer = this._currentPlayer;
         // convertir la matrice d'adjacence en string pour faciliter la verification
         // ex : 1,0,0,1,0,0,1,0,0 => 100100100
-        var coords = this._adjacentMatrix.toString().split(",").join(""), 
-        // ex : 100100100, 010010010, 001001001 (1 => player1; 2 => player2; 0 => case vide)
-        col = new RegExp("(2|1|0){0,2}[".concat(p, "](2|1|0){2}[").concat(p, "](2|1|0){2}[").concat(p, "](2|1|0){0,2}")), 
-        // ex : 111000000, 000111000, 000000111 (1 => player1; 2 => player2; 0 => case vide)
-        row = new RegExp("([".concat(p, "]{3}(2|1|0){6})|((2|1|0){3}[").concat(p, "]{3}(2|1|0){3})|((2|1|0){6}[").concat(p, "]{3})")), 
-        // ex : 100010001 (1 => player1; 2 => player2; 0 => case vide)
-        diagonal = new RegExp("[".concat(p, "](2|1|0){3}[").concat(p, "](2|1|0){3}[").concat(p, "]")), 
-        // ex : 001010100 (1 => player1; 2 => player2; 0 => case vide)
-        contreDiagonal = new RegExp("(2|1|0){2}[".concat(p, "](2|1|0){1}[").concat(p, "](2|1|0){1}[").concat(p, "](2|1|0){2}"));
-        // console.log(coords);
-        if (col.test(coords)) {
-            console.log("winner circle col" + p);
-            var _loop_1 = function (i) {
-                var colValue = [], 
-                // 1,1,1 ou 2,2,2
-                sequence = this_1._currentPlayer
-                    .toString()
-                    .repeat(3)
-                    .split("")
-                    .join(",");
-                for (var j = 0; j < this_1._dimensionX; j++) {
-                    colValue.push(this_1._adjacentMatrix[j][i]);
-                }
-                if (colValue.toString() === sequence) {
-                    // i correspond à la colonne
-                    var beginCaseHTML = document.getElementById("".concat(0, ";").concat(i));
-                    beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line col"></span>');
-                    var line_1 = document.querySelector(".line");
-                    // animation
-                    setTimeout(function () {
-                        line_1.style.height = "300px";
-                    }, 10);
-                    // display result
-                    this_1.showResult(false);
-                    return { value: true };
-                }
-            };
-            var this_1 = this;
-            // chercher l'indice de depart pour tracer la ligne
-            for (var i = 0; i < this._dimensionX; i++) {
-                var state_1 = _loop_1(i);
-                if (typeof state_1 === "object")
-                    return state_1.value;
-            }
-            return false;
-        }
-        if (row.test(coords)) {
-            console.log("winner circle row" + p);
-            var _loop_2 = function (i) {
-                // 1,1,1 ou 2,2,2
-                var sequence = this_2._currentPlayer
-                    .toString()
-                    .repeat(3)
-                    .split("")
-                    .join(",");
-                // prendre la ligne en un coup avec this.adjacentMatrix[i]
-                if (this_2._adjacentMatrix[i].toString() === sequence) {
-                    // i correspond à la ligne
-                    var beginCaseHTML = document.getElementById("".concat(i, ";").concat(0));
-                    beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line row"></span>');
-                    var line_2 = document.querySelector(".line");
-                    // animation
-                    setTimeout(function () {
-                        line_2.style.width = "300px";
-                    }, 10);
-                    // display result
-                    this_2.showResult(false);
-                    return { value: true };
-                }
-            };
-            var this_2 = this;
-            for (var i = 0; i < this._dimensionX; i++) {
-                var state_2 = _loop_2(i);
-                if (typeof state_2 === "object")
-                    return state_2.value;
-            }
-            return false;
-        }
-        if (diagonal.test(coords)) {
-            console.log("winner circle diagonal" + p);
-            // depart 0;0
-            var beginCaseHTML = document.getElementById("0;0");
-            beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line rotate"></span>');
-            var line_3 = document.querySelector(".line");
-            // animation
-            setTimeout(function () {
-                line_3.style.width = "414px";
-            }, 10);
-            // display result
+        this._checkWinning.setStringMatrix = this._adjacentMatrix.toString().split(",").join("");
+        if ((this._checkWinning.checkColumn()) ||
+            (this._checkWinning.checkRow()) ||
+            (this._checkWinning.checkDiagonal()) ||
+            (this._checkWinning.checkDraw())) {
             this.showResult(false);
             return true;
         }
-        if (contreDiagonal.test(coords)) {
-            console.log("winner circle contrediagonal" + p);
-            // 0;2
-            var beginCaseHTML = document.getElementById("0;2");
-            beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line rotate contre"></span>');
-            var line_4 = document.querySelector(".line");
-            // animation
-            setTimeout(function () {
-                line_4.style.width = "414px";
-            }, 10);
-            // display result
-            this.showResult(false);
-            return true;
-        }
-        // au cas où il n'y a plus de case vide mais pas de vainquer
-        if (!coords.includes("0")) {
-            console.log("draw");
-            // display result
+        if (this._checkWinning.checkDraw()) {
             this.showResult(true);
             return true;
         }
@@ -1253,7 +1332,7 @@ var TableGame = /** @class */ (function () {
         btnReset.onclick = function () {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
             if (socket && socket.place === "away")
-                return;
+                return (0, func_1.setMessage)("c'est votre adversaire qui peut clické");
             // si en ligne et "home" a clické
             if ((socket === null || socket === void 0 ? void 0 : socket.place) === "home") {
                 socket.emitReset();
@@ -1264,7 +1343,7 @@ var TableGame = /** @class */ (function () {
         btnContinue.onclick = function () {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
             if (socket && socket.place === "away")
-                return;
+                return (0, func_1.setMessage)("c'est votre adversaire qui peut clické");
             // si en ligne et "home" a clické
             if ((socket === null || socket === void 0 ? void 0 : socket.place) === "home") {
                 console.log("emit contine");
@@ -5498,6 +5577,7 @@ __webpack_require__(/*! ../css/style.css */ "./src/css/style.css");
 var point_1 = __webpack_require__(/*! ./models/point */ "./src/ts/models/point.ts");
 var socket_1 = __webpack_require__(/*! ./models/socket */ "./src/ts/models/socket.ts");
 var LocalGame_1 = __webpack_require__(/*! ./models/LocalGame */ "./src/ts/models/LocalGame.ts");
+var func_1 = __webpack_require__(/*! ./func */ "./src/ts/func.ts");
 var App = /** @class */ (function () {
     function App() {
         this._btnLocal = document.querySelector("#local");
@@ -5511,6 +5591,7 @@ var App = /** @class */ (function () {
             var localGame = new LocalGame_1.default(_this._circle, _this._croix);
         };
         this._btnOnline.onclick = function (e) {
+            (0, func_1.waitingForOpponent)();
             var socket = new socket_1.default(_this._circle, _this._croix);
         };
     };

@@ -85,7 +85,8 @@ io.on("connection", (socket) => {
     });
 
     socket.on("set point", (x: number, y: number, room: string) => {
-        io.in(room).emit("to active");
+        // emmettre à l'adversaire que c'est son tour
+        socket.broadcast.in(room).emit("to active");
         io.in(room).emit("draw point", x, y);
     });
 

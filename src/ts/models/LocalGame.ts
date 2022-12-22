@@ -26,7 +26,7 @@ class LocalGame {
             )
                 return;
                 
-            console.log("not socket");
+            // console.log("not socket");
     
             this._tableGame.drawPoint(x, y);
             this._tableGame.pushCoords(x, y);
@@ -35,6 +35,8 @@ class LocalGame {
             this._tableGame.permutation(circle, croix)
         };  
     }
+
+    
 }
 
 export default LocalGame

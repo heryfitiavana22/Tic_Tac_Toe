@@ -257,6 +257,14 @@ h2 {
 .b3.bar::after {animation-delay: 0s;}
 .b4.bar::after {animation-delay: 0.1s;}
 
+.message {
+    height: 20px;
+    opacity: 0;
+    text-align: center;
+    width: 100%;
+    transition: all 0.3s ease;
+}
+
 
 /* pair */
 @keyframes animate-bar-even {

@@ -1,3 +1,6 @@
+import { setMessage } from "../func";
+import CheckWinning from "./CheckWinning"
+
 class TableGame {
     private _currentPlayer = 1;
     private _isWinning = false;
@@ -9,10 +12,12 @@ class TableGame {
     private _currentPlayerHTML = document.querySelector(".current-player") as HTMLElement;
     // matrice d'adjacence qui represente le table (1 => player1; 2 => player2; 0 => case vide)
     private _adjacentMatrix: AdjacentMatrix = [];
+    private _checkWinning: CheckWinning;
 
     constructor(x: number, y: number) {
         this._dimensionX = x;
         this._dimensionY = y;
+        this._checkWinning = new CheckWinning(x, y)
     }
 
     init() {
@@ -78,143 +83,28 @@ class TableGame {
     }
 
     checkWinner() {
-        let p = this._currentPlayer;
+        this._checkWinning.setAdjacentMatrix = this._adjacentMatrix
+        this._checkWinning.setCurrentPlayer = this._currentPlayer
         // convertir la matrice d'adjacence en string pour faciliter la verification
         // ex : 1,0,0,1,0,0,1,0,0 => 100100100
-        let coords = this._adjacentMatrix.toString().split(",").join(""),
-            // ex : 100100100, 010010010, 001001001 (1 => player1; 2 => player2; 0 => case vide)
-            col = new RegExp(
-                `(2|1|0){0,2}[${p}](2|1|0){2}[${p}](2|1|0){2}[${p}](2|1|0){0,2}`
-            ),
-            // ex : 111000000, 000111000, 000000111 (1 => player1; 2 => player2; 0 => case vide)
-            row = new RegExp(
-                `([${p}]{3}(2|1|0){6})|((2|1|0){3}[${p}]{3}(2|1|0){3})|((2|1|0){6}[${p}]{3})`
-            ),
-            // ex : 100010001 (1 => player1; 2 => player2; 0 => case vide)
-            diagonal = new RegExp(`[${p}](2|1|0){3}[${p}](2|1|0){3}[${p}]`),
-            // ex : 001010100 (1 => player1; 2 => player2; 0 => case vide)
-            contreDiagonal = new RegExp(
-                `(2|1|0){2}[${p}](2|1|0){1}[${p}](2|1|0){1}[${p}](2|1|0){2}`
-            );
+        this._checkWinning.setStringMatrix = this._adjacentMatrix.toString().split(",").join("")
 
-        // console.log(coords);
-        if (col.test(coords)) {
-            console.log("winner circle col" + p);
-            // chercher l'indice de depart pour tracer la ligne
-            for (let i = 0; i < this._dimensionX; i++) {
-                let colValue = [],
-                    // 1,1,1 ou 2,2,2
-                    sequence = this._currentPlayer
-                        .toString()
-                        .repeat(3)
-                        .split("")
-                        .join(",");
-                for (let j = 0; j < this._dimensionX; j++) {
-                    colValue.push(this._adjacentMatrix[j][i]);
-                }
-
-                if (colValue.toString() === sequence) {
-                    // i correspond à la colonne
-                    let beginCaseHTML = document.getElementById(
-                        `${0};${i}`
-                    ) as HTMLDivElement;
-                    beginCaseHTML.insertAdjacentHTML(
-                        "beforeend",
-                        '<span class="line col"></span>'
-                    );
-                    let line = document.querySelector(
-                        ".line"
-                    ) as HTMLSpanElement;
-                    // animation
-                    setTimeout(() => {
-                        line.style.height = "300px";
-                    }, 10);
-                    // display result
-                    this.showResult(false);
-                    return true;
-                }
-            }
-            return false;
+        
+        if(
+            (this._checkWinning.checkColumn()) ||
+            (this._checkWinning.checkRow()) ||
+            (this._checkWinning.checkDiagonal()) || 
+            (this._checkWinning.checkDraw())
+        ) {
+            this.showResult(false)
+            return true
         }
-        if (row.test(coords)) {
-            console.log("winner circle row" + p);
-            for (let i = 0; i < this._dimensionX; i++) {
-                // 1,1,1 ou 2,2,2
-                let sequence = this._currentPlayer
-                    .toString()
-                    .repeat(3)
-                    .split("")
-                    .join(",");
-                // prendre la ligne en un coup avec this.adjacentMatrix[i]
-                if (this._adjacentMatrix[i].toString() === sequence) {
-                    // i correspond à la ligne
-                    let beginCaseHTML = document.getElementById(
-                        `${i};${0}`
-                    ) as HTMLDivElement;
-                    beginCaseHTML.insertAdjacentHTML(
-                        "beforeend",
-                        '<span class="line row"></span>'
-                    );
-                    let line = document.querySelector(
-                        ".line"
-                    ) as HTMLSpanElement;
-                    // animation
-                    setTimeout(() => {
-                        line.style.width = "300px";
-                    }, 10);
-                    // display result
-                    this.showResult(false);
-                    return true;
-                }
-            }
-            return false;
+    
+        if(this._checkWinning.checkDraw()) {
+            this.showResult(true)
+            return true
         }
-        if (diagonal.test(coords)) {
-            console.log("winner circle diagonal" + p);
-            // depart 0;0
-            let beginCaseHTML = document.getElementById(
-                `0;0`
-            ) as HTMLDivElement;
-            beginCaseHTML.insertAdjacentHTML(
-                "beforeend",
-                '<span class="line rotate"></span>'
-            );
-            let line = document.querySelector(".line") as HTMLSpanElement;
-            // animation
-            setTimeout(() => {
-                line.style.width = "414px";
-            }, 10);
-            // display result
-            this.showResult(false);
-            return true;
-        }
-        if (contreDiagonal.test(coords)) {
-            console.log("winner circle contrediagonal" + p);
-            // 0;2
-            let beginCaseHTML = document.getElementById(
-                `0;2`
-            ) as HTMLDivElement;
-            beginCaseHTML.insertAdjacentHTML(
-                "beforeend",
-                '<span class="line rotate contre"></span>'
-            );
-            let line = document.querySelector(".line") as HTMLSpanElement;
-            // animation
-            setTimeout(() => {
-                line.style.width = "414px";
-            }, 10);
-            // display result
-            this.showResult(false);
-            return true;
-        }
-        // au cas où il n'y a plus de case vide mais pas de vainquer
-        if (!coords.includes("0")) {
-            console.log("draw");
-            // display result
-            this.showResult(true);
-            return true;
-        }
-        return false;
+        return false
     }
 
     reset(circle: Point, croix: Point) {
@@ -261,16 +151,12 @@ class TableGame {
     }
 
     btnResult(circle: Point, croix: Point, socket?: SocketType) {
-        let btnReset = document.querySelector(
-                "button.reset"
-            ) as HTMLButtonElement,
-            btnContinue = document.querySelector(
-                "button.continue"
-            ) as HTMLButtonElement;
+        let btnReset = document.querySelector("button.reset") as HTMLButtonElement,
+            btnContinue = document.querySelector("button.continue") as HTMLButtonElement;
 
         btnReset.onclick = () => {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
-            if (socket && socket.place === "away") return
+            if (socket && socket.place === "away") return setMessage("c'est votre adversaire qui peut clické")
             // si en ligne et "home" a clické
             if(socket?.place === "home") {
                 socket.emitReset()
@@ -281,7 +167,7 @@ class TableGame {
 
         btnContinue.onclick = () => {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
-            if (socket && socket.place === "away") return
+            if (socket && socket.place === "away") return setMessage("c'est votre adversaire qui peut clické")
             // si en ligne et "home" a clické
             if(socket?.place === "home") {
                 console.log("emit contine");
