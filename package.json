@@ -18,6 +18,7 @@
     "@types/node": "^18.11.10",
     "@types/webpack": "^5.28.0",
     "css-loader": "^6.7.2",
+    "css-minimizer-webpack-plugin": "^4.2.2",
     "dotenv": "^16.0.3",
     "html-webpack-plugin": "^5.5.0",
     "mini-css-extract-plugin": "^2.7.1",

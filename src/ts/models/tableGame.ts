@@ -126,6 +126,21 @@ class TableGame {
         resultHTML.innerHTML = "";
     }
 
+    get getCurrentPlayer() {
+        return this._currentPlayer
+    }
+
+    set setCurrentPlayer(n: number) {
+        this._currentPlayer = n
+    }
+
+    set setCurrentPointHTML(pointHTML: string) {
+        this._currentPointHTML = pointHTML
+    }
+
+    set setCurrentPlayerHTML(playerHTML: string) {
+        this._currentPlayerHTML.innerHTML = playerHTML
+    }
 }
 
 function checkDimension(x: number) {
