@@ -993,7 +993,41 @@ var LocalGame = /** @class */ (function () {
             _this._tableGame.pushCoords(x, y);
             _this._tableGame.setIsWinning = _this._tableGame.checkWinner();
             // changement de joueur et verifier s'il a gagné
-            _this._tableGame.permutation(circle, croix);
+            _this.permutation(circle, croix);
+        };
+    };
+    LocalGame.prototype.permutation = function (circle, croix) {
+        // player 1 : circle; player 2: croix
+        // change _currentPlayer and _currentPointHTML
+        if (this._tableGame.getCurrentPlayer === 1) {
+            this._tableGame.setCurrentPlayer = 2;
+            this._tableGame.setCurrentPointHTML = croix.pointHTML;
+            this._tableGame.setCurrentPlayerHTML = croix.pointHTML;
+            // si gagnant
+            if (this._tableGame.getIsWinning) {
+                circle.win();
+                this.btnResult(circle, croix);
+            }
+        }
+        else {
+            this._tableGame.setCurrentPlayer = 1;
+            this._tableGame.setCurrentPointHTML = circle.pointHTML;
+            this._tableGame.setCurrentPlayerHTML = circle.pointHTML;
+            // si gagnant
+            if (this._tableGame.getIsWinning) {
+                croix.win();
+                this.btnResult(circle, croix);
+            }
+        }
+    };
+    LocalGame.prototype.btnResult = function (circle, croix) {
+        var _this = this;
+        var btnReset = document.querySelector("button.reset"), btnContinue = document.querySelector("button.continue");
+        btnReset.onclick = function () {
+            _this._tableGame.reset(circle, croix);
+        };
+        btnContinue.onclick = function () {
+            _this._tableGame.continue();
         };
     };
     return LocalGame;
@@ -1148,7 +1182,7 @@ var Socket = /** @class */ (function () {
             _this._tableGame.setIsWinning = _this._tableGame.checkWinner();
             ;
             // changement de joueur et verifier s'il a gagné
-            _this._tableGame.permutation(circle, croix, _this);
+            _this.permutation(circle, croix);
         });
     };
     Socket.prototype.toActive = function () {
@@ -1181,6 +1215,52 @@ var Socket = /** @class */ (function () {
             _this._tableGame.continue();
         });
     };
+    Socket.prototype.permutation = function (circle, croix) {
+        // player 1 : circle; player 2: croix
+        // change _currentPlayer and _currentPointHTML
+        if (this._tableGame.getCurrentPlayer === 1) {
+            this._tableGame.setCurrentPlayer = 2;
+            this._tableGame.setCurrentPointHTML = croix.pointHTML;
+            this._tableGame.setCurrentPlayerHTML = croix.pointHTML;
+            // si gagnant
+            if (this._tableGame.getIsWinning) {
+                circle.win();
+                this.btnResult(circle, croix);
+            }
+        }
+        else {
+            this._tableGame.setCurrentPlayer = 1;
+            this._tableGame.setCurrentPointHTML = circle.pointHTML;
+            this._tableGame.setCurrentPlayerHTML = circle.pointHTML;
+            // si gagnant
+            if (this._tableGame.getIsWinning) {
+                croix.win();
+                this.btnResult(circle, croix);
+            }
+        }
+    };
+    Socket.prototype.btnResult = function (circle, croix) {
+        var _this = this;
+        var btnReset = document.querySelector("button.reset"), btnContinue = document.querySelector("button.continue");
+        btnReset.onclick = function () {
+            // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
+            if (_this._place === "away")
+                return (0, func_1.setMessage)("c'est votre adversaire qui peut clické");
+            // si en ligne et "home" a clické
+            if (_this._place === "home")
+                return _this.emitContinue();
+            _this._tableGame.reset(circle, croix);
+        };
+        btnContinue.onclick = function () {
+            // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
+            if (_this._place === "away")
+                return (0, func_1.setMessage)("c'est votre adversaire qui peut clické");
+            // si en ligne et "home" a clické
+            if (_this._place === "home")
+                return _this.emitContinue();
+            _this._tableGame.continue();
+        };
+    };
     return Socket;
 }());
 exports["default"] = Socket;
@@ -1197,7 +1277,6 @@ exports["default"] = Socket;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-var func_1 = __webpack_require__(/*! ../func */ "./src/ts/func.ts");
 var CheckWinning_1 = __webpack_require__(/*! ./CheckWinning */ "./src/ts/models/CheckWinning.ts");
 var TableGame = /** @class */ (function () {
     function TableGame(x, y) {
@@ -1302,57 +1381,34 @@ var TableGame = /** @class */ (function () {
         resultHTML.style.transform = "scale(0)";
         resultHTML.innerHTML = "";
     };
-    TableGame.prototype.permutation = function (circle, croix, socket) {
-        // player 1 : circle; player 2: croix
-        // change _currentPlayer and _currentPointHTML
-        if (this._currentPlayer === 1) {
-            this._currentPlayer = 2;
-            this._currentPointHTML = croix.pointHTML;
-            this._currentPlayerHTML.innerHTML = croix.pointHTML;
-            // si gagnant
-            if (this._isWinning) {
-                circle.win();
-                this.btnResult(circle, croix, socket);
-            }
-        }
-        else {
-            this._currentPlayer = 1;
-            this._currentPointHTML = circle.pointHTML;
-            this._currentPlayerHTML.innerHTML = circle.pointHTML;
-            // si gagnant
-            if (this._isWinning) {
-                croix.win();
-                this.btnResult(circle, croix, socket);
-            }
-        }
-    };
-    TableGame.prototype.btnResult = function (circle, croix, socket) {
-        var _this = this;
-        var btnReset = document.querySelector("button.reset"), btnContinue = document.querySelector("button.continue");
-        btnReset.onclick = function () {
-            // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
-            if (socket && socket.place === "away")
-                return (0, func_1.setMessage)("c'est votre adversaire qui peut clické");
-            // si en ligne et "home" a clické
-            if ((socket === null || socket === void 0 ? void 0 : socket.place) === "home") {
-                socket.emitReset();
-                return;
-            }
-            _this.reset(circle, croix);
-        };
-        btnContinue.onclick = function () {
-            // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
-            if (socket && socket.place === "away")
-                return (0, func_1.setMessage)("c'est votre adversaire qui peut clické");
-            // si en ligne et "home" a clické
-            if ((socket === null || socket === void 0 ? void 0 : socket.place) === "home") {
-                console.log("emit contine");
-                socket.emitContinue();
-                return;
-            }
-            _this.continue();
-        };
-    };
+    Object.defineProperty(TableGame.prototype, "getCurrentPlayer", {
+        get: function () {
+            return this._currentPlayer;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(TableGame.prototype, "setCurrentPlayer", {
+        set: function (n) {
+            this._currentPlayer = n;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(TableGame.prototype, "setCurrentPointHTML", {
+        set: function (pointHTML) {
+            this._currentPointHTML = pointHTML;
+        },
+        enumerable: false,
+        configurable: true
+    });
+    Object.defineProperty(TableGame.prototype, "setCurrentPlayerHTML", {
+        set: function (playerHTML) {
+            this._currentPlayerHTML.innerHTML = playerHTML;
+        },
+        enumerable: false,
+        configurable: true
+    });
     return TableGame;
 }());
 function checkDimension(x) {

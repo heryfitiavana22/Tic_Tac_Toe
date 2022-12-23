@@ -1,8 +1,8 @@
 import TableGame from "./tableGame";
 
 class LocalGame {
-    _tableGame: TableGame;
-    _container = document.querySelector(".container  > div") as HTMLDivElement;
+    private _tableGame: TableGame;
+    private _container = document.querySelector(".container  > div") as HTMLDivElement;
 
     constructor(circle: Point, croix: Point) {
         this._tableGame = new TableGame(3,3)
@@ -32,10 +32,46 @@ class LocalGame {
             this._tableGame.pushCoords(x, y);
             this._tableGame.setIsWinning = this._tableGame.checkWinner();
             // changement de joueur et verifier s'il a gagné
-            this._tableGame.permutation(circle, croix)
+            this.permutation(circle, croix)
         };  
     }
 
+    permutation(circle: Point, croix: Point) {
+        // player 1 : circle; player 2: croix
+        // change _currentPlayer and _currentPointHTML
+        if (this._tableGame.getCurrentPlayer === 1) {
+            this._tableGame.setCurrentPlayer = 2;
+            this._tableGame.setCurrentPointHTML = croix.pointHTML;
+            this._tableGame.setCurrentPlayerHTML = croix.pointHTML;
+            // si gagnant
+            if (this._tableGame.getIsWinning) {
+                circle.win();
+                this.btnResult(circle, croix);
+            }
+        } else {
+            this._tableGame.setCurrentPlayer = 1;
+            this._tableGame.setCurrentPointHTML = circle.pointHTML;
+            this._tableGame.setCurrentPlayerHTML = circle.pointHTML;
+            // si gagnant
+            if (this._tableGame.getIsWinning) {
+                croix.win();
+                this.btnResult(circle, croix);
+            }
+        }
+    }
+
+    btnResult(circle: Point, croix: Point) {
+        let btnReset = document.querySelector("button.reset") as HTMLButtonElement,
+            btnContinue = document.querySelector("button.continue") as HTMLButtonElement;
+
+        btnReset.onclick = () => {
+            this._tableGame.reset(circle, croix);
+        };
+
+        btnContinue.onclick = () => {
+            this._tableGame.continue();
+        };
+    }
     
 }
 

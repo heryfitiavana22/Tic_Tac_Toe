@@ -126,57 +126,20 @@ class TableGame {
         resultHTML.innerHTML = "";
     }
 
-    permutation(circle: Point, croix: Point, socket?: any) {
-        // player 1 : circle; player 2: croix
-        // change _currentPlayer and _currentPointHTML
-        if (this._currentPlayer === 1) {
-            this._currentPlayer = 2;
-            this._currentPointHTML = croix.pointHTML;
-            this._currentPlayerHTML.innerHTML = croix.pointHTML;
-            // si gagnant
-            if (this._isWinning) {
-                circle.win();
-                this.btnResult(circle, croix, socket);
-            }
-        } else {
-            this._currentPlayer = 1;
-            this._currentPointHTML = circle.pointHTML;
-            this._currentPlayerHTML.innerHTML = circle.pointHTML;
-            // si gagnant
-            if (this._isWinning) {
-                croix.win();
-                this.btnResult(circle, croix, socket);
-            }
-        }
+    get getCurrentPlayer() {
+        return this._currentPlayer
     }
 
-    btnResult(circle: Point, croix: Point, socket?: SocketType) {
-        let btnReset = document.querySelector("button.reset") as HTMLButtonElement,
-            btnContinue = document.querySelector("button.continue") as HTMLButtonElement;
+    set setCurrentPlayer(n: number) {
+        this._currentPlayer = n
+    }
 
-        btnReset.onclick = () => {
-            // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
-            if (socket && socket.place === "away") return setMessage("c'est votre adversaire qui peut clické")
-            // si en ligne et "home" a clické
-            if(socket?.place === "home") {
-                socket.emitReset()
-                return
-            }
-            this.reset(circle, croix);
-        };
+    set setCurrentPointHTML(pointHTML: string) {
+        this._currentPointHTML = pointHTML
+    }
 
-        btnContinue.onclick = () => {
-            // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
-            if (socket && socket.place === "away") return setMessage("c'est votre adversaire qui peut clické")
-            // si en ligne et "home" a clické
-            if(socket?.place === "home") {
-                console.log("emit contine");
-                
-                socket.emitContinue()
-                return
-            }
-            this.continue();
-        };
+    set setCurrentPlayerHTML(playerHTML: string) {
+        this._currentPlayerHTML.innerHTML = playerHTML
     }
 }
 
