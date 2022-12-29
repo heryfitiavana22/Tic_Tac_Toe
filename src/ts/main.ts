@@ -2,6 +2,7 @@ import "../css/style.css";
 import Point from "./models/point";
 import Socket from "./models/socket"
 import LocalGame from "./models/LocalGame"
+import OnlineGame from "./models/OnlineGame"
 import { waitingForOpponent } from "./func";
 
 class App {
