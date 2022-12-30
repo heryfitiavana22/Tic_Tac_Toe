@@ -749,56 +749,10 @@ function plural(ms, msAbs, n, name) {
 
 /***/ }),
 
-/***/ "./src/ts/func.ts":
-/*!************************!*\
-  !*** ./src/ts/func.ts ***!
-  \************************/
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.setMessage = exports.showAvailableOpponent = exports.waitingForOpponent = void 0;
-function waitingForOpponent() {
-    var container = document.querySelector(".container  > div");
-    container.className = "wait-opponent";
-    container.innerHTML =
-        "<h2>Available opponent :</h2>\n    <ul class=\"list-opponent\">\n        \n    </ul>\n    <div class=\"animation\">\n        <div class=\"bar b1 odd\"></div>\n        <div class=\"bar b2 even\"></div>\n        <div class=\"bar b3 odd\"></div>\n        <div class=\"bar b4 even\"></div>\n    </div>";
-    var animation = document.querySelector(".animation");
-    animation.classList.add("loading");
-}
-exports.waitingForOpponent = waitingForOpponent;
-function showAvailableOpponent(list) {
-    var container = document.querySelector(".container  > div"), ul = document.querySelector("ul.list-opponent"), listHTML = "";
-    container.className = "wait-opponent";
-    for (var _i = 0, list_1 = list; _i < list_1.length; _i++) {
-        var e = list_1[_i];
-        // ex : room1, room2, ...
-        var idRoom = e.room.slice(e.room.indexOf("m") + 1);
-        listHTML += "<li id=\"".concat(e.id, ";").concat(idRoom, "\">").concat(e.id, "</li>");
-    }
-    ul.innerHTML = listHTML;
-    return ul;
-}
-exports.showAvailableOpponent = showAvailableOpponent;
-function setMessage(message) {
-    var messageHTML = document.querySelector(".message");
-    messageHTML.innerHTML = message;
-    messageHTML.style.opacity = "1";
-    setTimeout(function () {
-        messageHTML.style.opacity = "0";
-        messageHTML.innerHTML = "";
-    }, 1000);
-}
-exports.setMessage = setMessage;
-
-
-/***/ }),
-
-/***/ "./src/ts/models/CheckWinning.ts":
-/*!***************************************!*\
-  !*** ./src/ts/models/CheckWinning.ts ***!
-  \***************************************/
+/***/ "./src/ts/CheckWinning.ts":
+/*!********************************!*\
+  !*** ./src/ts/CheckWinning.ts ***!
+  \********************************/
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -961,16 +915,16 @@ exports["default"] = CheckWinning;
 
 /***/ }),
 
-/***/ "./src/ts/models/LocalGame.ts":
-/*!************************************!*\
-  !*** ./src/ts/models/LocalGame.ts ***!
-  \************************************/
+/***/ "./src/ts/LocalGame.ts":
+/*!*****************************!*\
+  !*** ./src/ts/LocalGame.ts ***!
+  \*****************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-var tableGame_1 = __webpack_require__(/*! ./tableGame */ "./src/ts/models/tableGame.ts");
+var tableGame_1 = __webpack_require__(/*! ./models/tableGame */ "./src/ts/models/tableGame.ts");
 var LocalGame = /** @class */ (function () {
     function LocalGame(circle, croix) {
         this._container = document.querySelector(".container  > div");
@@ -1037,6 +991,162 @@ exports["default"] = LocalGame;
 
 /***/ }),
 
+/***/ "./src/ts/OnlineGame.ts":
+/*!******************************!*\
+  !*** ./src/ts/OnlineGame.ts ***!
+  \******************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+"use strict";
+
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var socket_1 = __webpack_require__(/*! ./models/socket */ "./src/ts/models/socket.ts");
+var tableGame_1 = __webpack_require__(/*! ./models/tableGame */ "./src/ts/models/tableGame.ts");
+var OnlineGame = /** @class */ (function (_super) {
+    __extends(OnlineGame, _super);
+    function OnlineGame(circle, croix) {
+        var _this = _super.call(this, circle, croix) || this;
+        _this._tableGame = new tableGame_1.default(3, 3);
+        _this.onDrawPoint(circle, croix);
+        _this.onClickCase();
+        _this.onReady();
+        _this.onReset(circle, croix);
+        _this.onContinue();
+        _this.waitingForOpponent();
+        return _this;
+    }
+    OnlineGame.prototype.onReady = function () {
+        var _this = this;
+        this._socket.on("ready", function (home, away, room) {
+            _this._currentRoom = room;
+            // console.log("ready");
+            // console.log(`${home} vs ${away} in ${room}`);
+            _this._tableGame.init();
+        });
+    };
+    OnlineGame.prototype.onClickCase = function () {
+        var _this = this;
+        this._container.onclick = function (e) {
+            var target = e.target, coords = target.id.split(";"), x = Number(coords[0]), y = Number(coords[1]);
+            // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
+            if (coords.length !== 2 ||
+                target.innerHTML.length > 0 ||
+                _this._tableGame.getIsWinning)
+                return;
+            // et si on est autorisé de clické (si en ligne)
+            if (!_this._isActive)
+                return _this.setMessage("C'est le tour de votre adversaire");
+            // on draw point        
+            _this.emitPoint(x, y);
+            // mettre le joueur qui a clické en "non active" (tour de l'adversaire)
+            _this._isActive = false;
+        };
+    };
+    OnlineGame.prototype.onDrawPoint = function (circle, croix) {
+        var _this = this;
+        this._socket.on("draw point", function (x, y) {
+            _this._tableGame.drawPoint(x, y);
+            _this._tableGame.pushCoords(x, y);
+            _this._tableGame.setIsWinning = _this._tableGame.checkWinner();
+            ;
+            // changement de joueur et verifier s'il a gagné
+            _this.permutation(circle, croix);
+        });
+    };
+    OnlineGame.prototype.permutation = function (circle, croix) {
+        // player 1 : circle; player 2: croix
+        // change _currentPlayer and _currentPointHTML
+        if (this._tableGame.getCurrentPlayer === 1) {
+            this._tableGame.setCurrentPlayer = 2;
+            this._tableGame.setCurrentPointHTML = croix.pointHTML;
+            this._tableGame.setCurrentPlayerHTML = croix.pointHTML;
+            // si gagnant
+            if (this._tableGame.getIsWinning) {
+                circle.win();
+                this.btnResult(circle, croix);
+            }
+        }
+        else {
+            this._tableGame.setCurrentPlayer = 1;
+            this._tableGame.setCurrentPointHTML = circle.pointHTML;
+            this._tableGame.setCurrentPlayerHTML = circle.pointHTML;
+            // si gagnant
+            if (this._tableGame.getIsWinning) {
+                croix.win();
+                this.btnResult(circle, croix);
+            }
+        }
+    };
+    OnlineGame.prototype.btnResult = function (circle, croix) {
+        var _this = this;
+        var btnReset = document.querySelector("button.reset"), btnContinue = document.querySelector("button.continue");
+        btnReset.onclick = function () {
+            // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
+            if (_this._place === "away")
+                return _this.setMessage("c'est votre adversaire qui peut clické");
+            // si en ligne et "home" a clické
+            if (_this._place === "home")
+                return _this.emitContinue();
+            _this._tableGame.reset(circle, croix);
+        };
+        btnContinue.onclick = function () {
+            // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
+            if (_this._place === "away")
+                return _this.setMessage("c'est votre adversaire qui peut clické");
+            // si en ligne et "home" a clické
+            if (_this._place === "home")
+                return _this.emitContinue();
+            _this._tableGame.continue();
+        };
+    };
+    OnlineGame.prototype.onReset = function (circle, croix) {
+        var _this = this;
+        this._socket.on("reset", function () {
+            _this._tableGame.reset(circle, croix);
+            if (_this._place === "home") {
+                _this._isActive = true;
+                return;
+            }
+            _this._isActive = false;
+        });
+    };
+    OnlineGame.prototype.onContinue = function () {
+        var _this = this;
+        this._socket.on("continue", function () {
+            _this._tableGame.continue();
+        });
+    };
+    OnlineGame.prototype.setMessage = function (message) {
+        var messageHTML = document.querySelector(".message");
+        messageHTML.innerHTML = message;
+        messageHTML.style.opacity = "1";
+        setTimeout(function () {
+            messageHTML.style.opacity = "0";
+            messageHTML.innerHTML = "";
+        }, 1000);
+    };
+    return OnlineGame;
+}(socket_1.default));
+exports["default"] = OnlineGame;
+
+
+/***/ }),
+
 /***/ "./src/ts/models/point.ts":
 /*!********************************!*\
   !*** ./src/ts/models/point.ts ***!
@@ -1078,8 +1188,6 @@ exports["default"] = Point;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var socket_io_client_1 = __webpack_require__(/*! socket.io-client */ "./node_modules/.pnpm/socket.io-client@4.5.4/node_modules/socket.io-client/build/cjs/index.js");
-var tableGame_1 = __webpack_require__(/*! ./tableGame */ "./src/ts/models/tableGame.ts");
-var func_1 = __webpack_require__(/*! ../func */ "./src/ts/func.ts");
 var Socket = /** @class */ (function () {
     function Socket(circle, croix) {
         this._isActive = false;
@@ -1088,42 +1196,42 @@ var Socket = /** @class */ (function () {
         this._currentRoom = "";
         this._socket = (0, socket_io_client_1.io)();
         this._container = document.querySelector(".container  > div");
-        this._tableGame = new tableGame_1.default(3, 3);
         this.emitStartGame();
-        this.onReady();
-        this.waitingForOpponent();
+        this.onWaitingOpponent();
+        this.onNewOpponent();
         this.toActive();
         this.setCurrentPoint(circle, croix);
-        this.onReset(circle, croix);
-        this.onContinue();
     }
     Socket.prototype.emitStartGame = function () {
         this._socket.emit("start game");
     };
-    Socket.prototype.onReady = function () {
-        var _this = this;
-        this._socket.on("ready", function (home, away, room) {
-            _this._currentRoom = room;
-            // console.log("ready");
-            // console.log(`${home} vs ${away} in ${room}`);
-            _this._tableGame.init();
-        });
-    };
-    Socket.prototype.waitingForOpponent = function () {
+    Socket.prototype.onWaitingOpponent = function () {
         var _this = this;
         this._socket.on("waiting opponent", function (rooms) {
             // console.log("wait oppo")
             // console.log("waiting opponent");
-            (0, func_1.waitingForOpponent)();
+            _this.waitingForOpponent();
             // home (admettons)
             _this._isActive = true;
             _this._currentRoom = rooms;
         });
+    };
+    Socket.prototype.waitingForOpponent = function () {
+        var container = document.querySelector(".container  > div");
+        container.className = "wait-opponent";
+        container.innerHTML =
+            "<h2>Available opponent :</h2>\n        <ul class=\"list-opponent\">\n            \n        </ul>\n        <div class=\"animation\">\n            <div class=\"bar b1 odd\"></div>\n            <div class=\"bar b2 even\"></div>\n            <div class=\"bar b3 odd\"></div>\n            <div class=\"bar b4 even\"></div>\n        </div>";
+        var animation = document.querySelector(".animation");
+        animation.classList.add("loading");
+    };
+    Socket.prototype.onNewOpponent = function () {
+        var _this = this;
         this._socket.on("new opponent", function (listPlayer) {
             // console.log("new oppo");
             // enlever l"utilisateur courant (ce n'est pas un adversaire ^_^)
             listPlayer = listPlayer.filter(function (e) { return e.id !== _this._socket.id; });
-            var ul = (0, func_1.showAvailableOpponent)(listPlayer);
+            var ul = _this.showAvailableOpponent(listPlayer);
+            // handle click on opponent
             ul.onclick = function (e) {
                 var target = e.target, _a = target.id.split(";"), idAway = _a[0], idRoom = _a[1], room = "room".concat(idRoom), animation = document.querySelector(".animation");
                 _this._socket.emit("to ready", room, _this._socket.id, idAway);
@@ -1132,8 +1240,19 @@ var Socket = /** @class */ (function () {
                 animation.classList.remove("loading");
                 // activé le "click" au container
             };
-            _this.onClickCase();
         });
+    };
+    Socket.prototype.showAvailableOpponent = function (list) {
+        var container = document.querySelector(".container  > div"), ul = document.querySelector("ul.list-opponent"), listHTML = "";
+        container.className = "wait-opponent";
+        for (var _i = 0, list_1 = list; _i < list_1.length; _i++) {
+            var e = list_1[_i];
+            // ex : room1, room2, ...
+            var idRoom = e.room.slice(e.room.indexOf("m") + 1);
+            listHTML += "<li id=\"".concat(e.id, ";").concat(idRoom, "\">").concat(e.id, "</li>");
+        }
+        ul.innerHTML = listHTML;
+        return ul;
     };
     Socket.prototype.setCurrentPoint = function (circle, croix) {
         var _this = this;
@@ -1151,56 +1270,21 @@ var Socket = /** @class */ (function () {
             currentPlayerHTML.innerHTML = croix.pointHTML;
         });
     };
-    Socket.prototype.onClickCase = function () {
-        var _this = this;
-        this._container.onclick = function (e) {
-            var target = e.target, coords = target.id.split(";"), x = Number(coords[0]), y = Number(coords[1]);
-            // et si on est autorisé de clické (si en ligne)
-            if (!_this._isActive)
-                return (0, func_1.setMessage)("C'est le tour de votre adversaire");
-            // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
-            if (coords.length !== 2 ||
-                target.innerHTML.length > 0 ||
-                _this._tableGame.getIsWinning)
-                return;
-            // on draw point        
-            _this.emitPoint(x, y);
-            // mettre le joueur qui a clické en "non active" (tour de l'adversaire)
-            _this._isActive = false;
-        };
-    };
     Socket.prototype.emitPoint = function (x, y) {
         this._socket.emit("set point", x, y, this._currentRoom);
     };
     Socket.prototype.toActive = function () {
         var _this = this;
         this._socket.on("to active", function () {
-            console.log("to active");
+            // console.log("to active");
             _this._isActive = true;
         });
     };
     Socket.prototype.emitReset = function () {
         this._socket.emit("to reset", this._currentRoom);
     };
-    Socket.prototype.onReset = function (circle, croix) {
-        var _this = this;
-        this._socket.on("reset", function () {
-            _this._tableGame.reset(circle, croix);
-            if (_this._place === "home") {
-                _this._isActive = true;
-                return;
-            }
-            _this._isActive = false;
-        });
-    };
     Socket.prototype.emitContinue = function () {
         this._socket.emit("to continue", this._currentRoom);
-    };
-    Socket.prototype.onContinue = function () {
-        var _this = this;
-        this._socket.on("continue", function () {
-            _this._tableGame.continue();
-        });
     };
     return Socket;
 }());
@@ -1218,7 +1302,7 @@ exports["default"] = Socket;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-var CheckWinning_1 = __webpack_require__(/*! ./CheckWinning */ "./src/ts/models/CheckWinning.ts");
+var CheckWinning_1 = __webpack_require__(/*! ../CheckWinning */ "./src/ts/CheckWinning.ts");
 var TableGame = /** @class */ (function () {
     function TableGame(x, y) {
         this._currentPlayer = 1;
@@ -5572,9 +5656,8 @@ var exports = __webpack_exports__;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 __webpack_require__(/*! ../css/style.css */ "./src/css/style.css");
 var point_1 = __webpack_require__(/*! ./models/point */ "./src/ts/models/point.ts");
-var socket_1 = __webpack_require__(/*! ./models/socket */ "./src/ts/models/socket.ts");
-var LocalGame_1 = __webpack_require__(/*! ./models/LocalGame */ "./src/ts/models/LocalGame.ts");
-var func_1 = __webpack_require__(/*! ./func */ "./src/ts/func.ts");
+var LocalGame_1 = __webpack_require__(/*! ./LocalGame */ "./src/ts/LocalGame.ts");
+var OnlineGame_1 = __webpack_require__(/*! ./OnlineGame */ "./src/ts/OnlineGame.ts");
 var App = /** @class */ (function () {
     function App() {
         this._btnLocal = document.querySelector("#local");
@@ -5588,8 +5671,7 @@ var App = /** @class */ (function () {
             var localGame = new LocalGame_1.default(_this._circle, _this._croix);
         };
         this._btnOnline.onclick = function (e) {
-            (0, func_1.waitingForOpponent)();
-            var socket = new socket_1.default(_this._circle, _this._croix);
+            var socket = new OnlineGame_1.default(_this._circle, _this._croix);
         };
     };
     return App;

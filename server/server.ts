@@ -32,6 +32,8 @@ io.on("connection", (socket) => {
     console.log("user connected");
 
     socket.on("start game", (name) => {
+        console.log("start");
+        
         // pousser le player
         listPlayer.push({
             id: socket.id,

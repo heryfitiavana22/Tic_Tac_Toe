@@ -1,10 +1,26 @@
-import Socket from "./socket"
-import { showAvailableOpponent, waitingForOpponent, setMessage } from "../func";
+import Socket from "./models/socket"
+import TableGame from "./models/tableGame";
 
 class OnlineGame extends Socket {
+    protected _tableGame: TableGame;
     constructor(circle: Point, croix: Point) {
         super(circle, croix)
+        this._tableGame = new TableGame(3,3)
         this.onDrawPoint(circle, croix);
+        this.onClickCase()
+        this.onReady();
+        this.onReset(circle, croix);
+        this.onContinue();
+        this.waitingForOpponent()
+    }
+
+    onReady() {
+        this._socket.on("ready", (home, away, room) => {
+            this._currentRoom = room;
+            // console.log("ready");
+            // console.log(`${home} vs ${away} in ${room}`);
+            this._tableGame.init();
+        });
     }
 
     onClickCase() {
@@ -14,9 +30,6 @@ class OnlineGame extends Socket {
                 x = Number(coords[0]),
                 y = Number(coords[1]);
             
-            // et si on est autorisé de clické (si en ligne)
-            if(!this._isActive) return setMessage("C'est le tour de votre adversaire")
-            
             // si on a cliqué sur une balise à part la ".case" (ex: .point; gap)
             if (
                 coords.length !== 2 ||
@@ -24,6 +37,10 @@ class OnlineGame extends Socket {
                 this._tableGame.getIsWinning
             )
                 return;
+
+            // et si on est autorisé de clické (si en ligne)
+            if(!this._isActive) return this.setMessage("C'est le tour de votre adversaire")
+            
                 
             // on draw point        
             this.emitPoint(x, y)
@@ -75,7 +92,7 @@ class OnlineGame extends Socket {
 
         btnReset.onclick = () => {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
-            if (this._place === "away") return setMessage("c'est votre adversaire qui peut clické")
+            if (this._place === "away") return this.setMessage("c'est votre adversaire qui peut clické")
             // si en ligne et "home" a clické
             if(this._place === "home") return this.emitContinue()
 
@@ -84,12 +101,39 @@ class OnlineGame extends Socket {
 
         btnContinue.onclick = () => {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
-            if (this._place === "away") return setMessage("c'est votre adversaire qui peut clické")
+            if (this._place === "away") return this.setMessage("c'est votre adversaire qui peut clické")
             // si en ligne et "home" a clické
             if(this._place === "home") return this.emitContinue()
 
             this._tableGame.continue();
         };
+    }
+
+    onReset(circle: Point, croix: Point) {
+        this._socket.on("reset", () => {
+            this._tableGame.reset(circle, croix);
+            if (this._place === "home") {
+                this._isActive = true;
+                return;
+            }
+            this._isActive = false;
+        });
+    }
+
+    onContinue() {
+        this._socket.on("continue", () => {
+            this._tableGame.continue();
+        });
+    }
+
+    setMessage(message: string) {
+        let messageHTML = document.querySelector(".message") as HTMLParagraphElement
+        messageHTML.innerHTML = message
+        messageHTML.style.opacity = "1"
+        setTimeout(() => {
+            messageHTML.style.opacity = "0"
+            messageHTML.innerHTML = ""
+        }, 1000)
     }
 }
 
