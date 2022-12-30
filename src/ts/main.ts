@@ -1,8 +1,7 @@
 import "../css/style.css";
 import Point from "./models/point";
-import Socket from "./models/socket"
-import LocalGame from "./models/LocalGame"
-import { waitingForOpponent } from "./func";
+import LocalGame from "./LocalGame"
+import OnlineGame from "./OnlineGame"
 
 class App {
     _circle: Point;
@@ -21,8 +20,7 @@ class App {
         }
 
         this._btnOnline.onclick = (e: MouseEvent) => {
-            waitingForOpponent()
-            let socket = new Socket(this._circle, this._croix)
+            let socket = new OnlineGame(this._circle, this._croix)
         }
     }
 }

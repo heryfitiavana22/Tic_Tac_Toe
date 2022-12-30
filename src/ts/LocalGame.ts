@@ -1,4 +1,4 @@
-import TableGame from "./tableGame";
+import TableGame from "./models/tableGame";
 
 class LocalGame {
     private _tableGame: TableGame;

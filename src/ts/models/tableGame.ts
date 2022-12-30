@@ -1,5 +1,4 @@
-import { setMessage } from "../func";
-import CheckWinning from "./CheckWinning"
+import CheckWinning from "../CheckWinning"
 
 class TableGame {
     private _currentPlayer = 1;

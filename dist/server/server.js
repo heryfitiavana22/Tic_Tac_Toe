@@ -18,6 +18,7 @@ var listPlayer = [];
 io.on("connection", function (socket) {
     console.log("user connected");
     socket.on("start game", function (name) {
+        console.log("start");
         // pousser le player
         listPlayer.push({
             id: socket.id,
