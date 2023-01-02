@@ -93,8 +93,8 @@ class TableGame {
             (this._checkWinning.checkColumn()) ||
             (this._checkWinning.checkRow()) ||
             (this._checkWinning.checkDiagonal()) || 
-            (this._checkWinning.checkDraw())
-        ) {
+            (this._checkWinning.checkContreDiagonal())
+        ) {                        
             this.showResult(false)
             return true
         }
