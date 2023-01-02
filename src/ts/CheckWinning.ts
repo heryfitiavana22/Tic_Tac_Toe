@@ -137,7 +137,7 @@ class CheckWinning {
             );
 
         if (contreDiagonal.test(this._stringMatrix)) {
-            console.log("winner circle contrediagonal" + p);
+            // console.log("winner circle contrediagonal" + p);
             // 0;2
             let beginCaseHTML = document.getElementById(`0;2`) as HTMLDivElement;
             beginCaseHTML.insertAdjacentHTML(
@@ -161,11 +161,12 @@ class CheckWinning {
     checkDraw() {
         // au cas où il n'y a plus de case vide mais pas de vainquer
         if (!this._stringMatrix.includes("0")) {
-            console.log("draw");
+            // console.log("draw");
             // display result
             // this.showResult(true);
             return true;
         }
+        return false
     }
 }
 

@@ -884,7 +884,7 @@ var CheckWinning = /** @class */ (function () {
         // ex : 001010100 (1 => player1; 2 => player2; 0 => case vide)
         contreDiagonal = new RegExp("(2|1|0){2}[".concat(p, "](2|1|0){1}[").concat(p, "](2|1|0){1}[").concat(p, "](2|1|0){2}"));
         if (contreDiagonal.test(this._stringMatrix)) {
-            console.log("winner circle contrediagonal" + p);
+            // console.log("winner circle contrediagonal" + p);
             // 0;2
             var beginCaseHTML = document.getElementById("0;2");
             beginCaseHTML.insertAdjacentHTML("beforeend", '<span class="line rotate contre"></span>');
@@ -902,11 +902,12 @@ var CheckWinning = /** @class */ (function () {
     CheckWinning.prototype.checkDraw = function () {
         // au cas où il n'y a plus de case vide mais pas de vainquer
         if (!this._stringMatrix.includes("0")) {
-            console.log("draw");
+            // console.log("draw");
             // display result
             // this.showResult(true);
             return true;
         }
+        return false;
     };
     return CheckWinning;
 }());
@@ -1379,7 +1380,7 @@ var TableGame = /** @class */ (function () {
         if ((this._checkWinning.checkColumn()) ||
             (this._checkWinning.checkRow()) ||
             (this._checkWinning.checkDiagonal()) ||
-            (this._checkWinning.checkDraw())) {
+            (this._checkWinning.checkContreDiagonal())) {
             this.showResult(false);
             return true;
         }
