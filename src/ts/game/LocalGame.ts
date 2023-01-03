@@ -1,16 +1,22 @@
-import TableGame from "./models/tableGame";
+import TableGame from "../models/TableGame";
 
 class LocalGame {
     private _tableGame: TableGame;
     private _container = document.querySelector(".container  > div") as HTMLDivElement;
+    private _circle: Point
+    private _croix: Point
 
-    constructor(circle: Point, croix: Point) {
-        this._tableGame = new TableGame(3,3)
+    constructor(tableGame: TableGame, circle: Point, croix: Point) {
+        this._circle = circle
+        this._croix = croix
+        this._tableGame = tableGame
         this._tableGame.init()
-        this.onClickCase(circle, croix)
+        circle.init()
+        croix.init()
+        this.onClickCase()
     }
 
-    onClickCase(circle: Point, croix: Point) {
+    onClickCase() {
         this._container.onclick = (e: MouseEvent) => {
             let target = e.target as HTMLDivElement,
                 coords = target.id.split(";"),
@@ -32,40 +38,40 @@ class LocalGame {
             this._tableGame.pushCoords(x, y);
             this._tableGame.setIsWinning = this._tableGame.checkWinner();
             // changement de joueur et verifier s'il a gagné
-            this.permutation(circle, croix)
+            this.permutation()
         };  
     }
 
-    permutation(circle: Point, croix: Point) {
+    permutation() {
         // player 1 : circle; player 2: croix
         // change _currentPlayer and _currentPointHTML
         if (this._tableGame.getCurrentPlayer === 1) {
             this._tableGame.setCurrentPlayer = 2;
-            this._tableGame.setCurrentPointHTML = croix.pointHTML;
-            this._tableGame.setCurrentPlayerHTML = croix.pointHTML;
+            this._tableGame.setCurrentPointHTML = this._croix.pointHTML;
+            this._tableGame.setCurrentPlayerHTML = this._croix.pointHTML;
             // si gagnant
             if (this._tableGame.getIsWinning) {
-                circle.win();
-                this.btnResult(circle, croix);
+                this._circle.win();
+                this.btnResult();
             }
         } else {
             this._tableGame.setCurrentPlayer = 1;
-            this._tableGame.setCurrentPointHTML = circle.pointHTML;
-            this._tableGame.setCurrentPlayerHTML = circle.pointHTML;
+            this._tableGame.setCurrentPointHTML = this._circle.pointHTML;
+            this._tableGame.setCurrentPlayerHTML = this._circle.pointHTML;
             // si gagnant
             if (this._tableGame.getIsWinning) {
-                croix.win();
-                this.btnResult(circle, croix);
+                this._croix.win();
+                this.btnResult();
             }
         }
     }
 
-    btnResult(circle: Point, croix: Point) {
+    btnResult() {
         let btnReset = document.querySelector("button.reset") as HTMLButtonElement,
             btnContinue = document.querySelector("button.continue") as HTMLButtonElement;
 
         btnReset.onclick = () => {
-            this._tableGame.reset(circle, croix);
+            this._tableGame.reset(this._circle, this._croix);
         };
 
         btnContinue.onclick = () => {

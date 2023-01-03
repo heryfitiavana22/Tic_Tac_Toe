@@ -1,11 +1,10 @@
 import { io } from "socket.io-client"
+import User from "../user/User";
 
 class Socket {
     protected _isActive = false;
-    protected _place = ""; // (home ou away)
-    protected _myName = "herydj";
-    protected _currentRoom = "";
     protected _socket = io();
+    protected _user = new User();
     protected _container = document.querySelector(".container  > div") as HTMLDivElement;
 
     constructor(circle: Point, croix: Point) {
@@ -16,42 +15,41 @@ class Socket {
         this.setCurrentPoint(circle, croix);
     }
 
-    emitStartGame() {
-        this._socket.emit("start game");
+    emitStartGame() {   
+        this._user.getUSer()
+        this._socket.emit("start game", this._user.name);
     }
 
     onWaitingOpponent() {
         this._socket.on("waiting opponent", (rooms) => {
-            // console.log("wait oppo")
-            // console.log("waiting opponent");
             this.waitingForOpponent()
             // home (admettons)
             this._isActive = true;
-            this._currentRoom = rooms;
+            this._user.currentRoom = rooms
         });
     }
 
     waitingForOpponent() {
         let container = document.querySelector(".container  > div") as HTMLDivElement;
         container.className = "wait-opponent"
-        container.innerHTML =
-        `<h2>Available opponent :</h2>
-        <ul class="list-opponent">
-            
-        </ul>
-        <div class="animation">
-            <div class="bar b1 odd"></div>
-            <div class="bar b2 even"></div>
-            <div class="bar b3 odd"></div>
-            <div class="bar b4 even"></div>
-        </div>`
+        container.innerHTML =`
+            <h2>Available opponent :</h2>
+            <ul class="list-opponent">
+                
+            </ul>
+            <div class="animation">
+                <div class="bar b1 odd"></div>
+                <div class="bar b2 even"></div>
+                <div class="bar b3 odd"></div>
+                <div class="bar b4 even"></div>
+            </div>
+        `;
         let animation = document.querySelector(".animation") as HTMLDivElement;
         animation.classList.add("loading")
     }
 
     onNewOpponent() {
         this._socket.on("new opponent", (listPlayer: player[]) => {
-            // console.log("new oppo");
             // enlever l"utilisateur courant (ce n'est pas un adversaire ^_^)
             listPlayer = listPlayer.filter((e) => e.id !== this._socket.id);
 
@@ -59,17 +57,15 @@ class Socket {
             // handle click on opponent
             ul.onclick = (e: MouseEvent) => {
                 let target = e.target as HTMLLIElement,
+                    nameOpponent = target.innerHTML,
                     [idAway, idRoom] = target.id.split(";"),
                     room = `room${idRoom}`,
-                    animation = document.querySelector(
-                        ".animation"
-                    ) as HTMLDivElement;
+                    animation = document.querySelector(".animation") as HTMLDivElement;
 
                 this._socket.emit("to ready", room, this._socket.id, idAway);
                 // changer le "room" par le "room" de l'adversaire
-                this._currentRoom = `room${idRoom}`;
+                this._user.currentRoom = `room${idRoom}`;
                 animation.classList.remove("loading");
-                // activé le "click" au container
             };
             
         });
@@ -84,7 +80,7 @@ class Socket {
         for(let e of list) {
             // ex : room1, room2, ...
             let idRoom = e.room.slice(e.room.indexOf("m")+1)
-            listHTML += `<li id="${e.id};${idRoom}">${e.id}</li>`
+            listHTML += `<li id="${e.id};${idRoom}">${e.name}</li>`
         }   
     
         ul.innerHTML = listHTML
@@ -96,21 +92,21 @@ class Socket {
 
         this._socket.on("home", () => {
             // console.log("home");
-            this._place = "home";
+            this._user.place = "home";
             this._isActive = true;
             currentPlayerHTML.innerHTML = circle.pointHTML;
         });
 
         this._socket.on("away", () => {
             // console.log("away");
-            this._place = "away";
+            this._user.place = "away";
             this._isActive = false;
             currentPlayerHTML.innerHTML = croix.pointHTML;
         });
     }
 
     emitPoint(x: number, y: number) {
-        this._socket.emit("set point", x, y, this._currentRoom);
+        this._socket.emit("set point", x, y, this._user.currentRoom);
     }
 
 
@@ -122,11 +118,11 @@ class Socket {
     }
 
     emitReset() {
-        this._socket.emit("to reset", this._currentRoom);
+        this._socket.emit("to reset", this._user.currentRoom);
     }
 
     emitContinue() {
-        this._socket.emit("to continue", this._currentRoom);
+        this._socket.emit("to continue", this._user.currentRoom);
     }   
 }
 

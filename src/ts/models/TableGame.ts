@@ -1,4 +1,4 @@
-import CheckWinning from "../CheckWinning"
+import CheckWinning from "../lib/CheckWinning"
 
 class TableGame {
     private _currentPlayer = 1;
@@ -17,6 +17,7 @@ class TableGame {
         this._dimensionX = x;
         this._dimensionY = y;
         this._checkWinning = new CheckWinning(x, y)
+        this.playersContainer()
     }
 
     init() {
@@ -27,6 +28,8 @@ class TableGame {
 
         let container = document.querySelector(".container > div") as HTMLDivElement;
         container.className = "table-game"
+
+        this._currentPlayerHTML = document.querySelector(".current-player") as HTMLElement;
     }
 
     drawTable() {
@@ -40,6 +43,33 @@ class TableGame {
             casesHTML;
     }
 
+    playersContainer() {
+        let body = document.querySelector("body") as HTMLElement;
+        body.insertAdjacentHTML(
+            "beforeend", 
+            `
+            <div class="players">
+                <p class="message">fd</p>
+                <div class="current-player">
+                    <span class="point circle"></span>
+                </div>
+                <div class="player">
+                    <span class="name player1">player 1 : 
+                        <span class="score">0</span>
+                    </span>
+                    <span class="point circle"></span>
+                </div>
+                <div class="player">
+                    <span class="name player2">player 2 :
+                        <span class="score">0</span>
+                    </span>
+                    <span class="point croix"></span>
+                </div>
+            </div>
+            `
+        );
+    }
+
     createAdjacentMatrix() {
         for (let i = 0; i < this._dimensionX; i++) {
             this._adjacentMatrix.push([0, 0, 0]);
@@ -48,7 +78,6 @@ class TableGame {
 
     pushCoords(x: number, y: number) {
         this._adjacentMatrix[x][y] = this._currentPlayer;
-        // console.log(this.adjacentMatrix);
     }
 
     drawPoint(x: number, y: number) {
@@ -66,7 +95,8 @@ class TableGame {
             <div class="btn-container">
                 <button class="reset">Reset</button>
                 <button class="continue">Continue</button>
-            </div>`;
+            </div>
+        `;
         // attendre pour afficher un peu la ligne
         setTimeout(() => {
             resultHTML.style.transform = "scale(1)";
@@ -111,8 +141,8 @@ class TableGame {
         this._currentPlayer = 1;
         this._currentPointHTML = circle.pointHTML;
         this._currentPlayerHTML.innerHTML = circle.pointHTML
-        circle.init();
-        croix.init();
+        circle.reset();
+        croix.reset();
         let resultHTML = document.querySelector(".result") as HTMLDivElement;
         resultHTML.style.transform = "scale(0)";
         resultHTML.innerHTML = "";

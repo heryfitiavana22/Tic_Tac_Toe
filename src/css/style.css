@@ -35,6 +35,9 @@ body {
     overflow-x: hidden;
     overflow-y: scroll;
 }
+.user-form {
+    background-color: #212121;
+}
 
 .case {
     position: relative;
@@ -212,6 +215,30 @@ h2 {
 .list-opponent > li:nth-child(even) {
     background-color: #333333;
     color: rgb(222, 222, 222);
+}
+
+.user-form p {
+    margin: 0;
+    font-size: 18px;
+}
+.user-form input {
+    height: 25px;
+    margin-top: 10px;
+    background-color: #575757;
+    border-radius: 4px;
+    color: rgb(218, 218, 218);
+    border: none;
+}
+.user-form input:focus-visible {outline: none;}
+.user-form button {
+    color: rgb(218, 218, 218);
+    background-color: black;
+    border: 1px solid black;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.user-form button:hover {
+    background-color: rgb(56, 56, 56);
 }
 
 .animation {
