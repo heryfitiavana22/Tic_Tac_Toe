@@ -20,13 +20,14 @@ class OnlineGame extends Socket {
     }
 
     onReady() {
-        this._socket.on("ready", (home, away, room) => {
+        this._socket.on("ready", (nameHome, nameAway, room) => {
             this._user.currentRoom = room;
             // console.log("ready");
             // console.log(`${home} vs ${away} in ${room}`);
             this._tableGame.init();
-            this._circle.init()
-            this._croix.init()
+            this._tableGame.renderPlayersContainer(nameHome, nameAway)
+            this._circle.init(nameHome)
+            this._croix.init(nameAway)
         });
     }
 
@@ -98,9 +99,7 @@ class OnlineGame extends Socket {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
             if (this._user.place === "away") return this.setMessage("c'est votre adversaire qui peut clické")
             // si en ligne et "home" a clické
-            if(this._user.place === "home") return this.emitContinue()
-
-            this._tableGame.reset(this._circle, this._croix);
+            if(this._user.place === "home") return this.emitReset();
         };
 
         btnContinue.onclick = () => {
@@ -108,8 +107,6 @@ class OnlineGame extends Socket {
             if (this._user.place === "away") return this.setMessage("c'est votre adversaire qui peut clické")
             // si en ligne et "home" a clické
             if(this._user.place === "home") return this.emitContinue()
-
-            this._tableGame.continue();
         };
     }
 

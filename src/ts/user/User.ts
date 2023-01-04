@@ -2,6 +2,7 @@ class User {
     name = "";
     place = ""; // (home ou away)
     currentRoom = "";
+    nameOpponent = "";
 
     getUSer() {
         this.name = localStorage.getItem("userTTT") as string
@@ -9,7 +10,9 @@ class User {
     }
 
     showOpponent() {
-        
+        if(this.place === "home") {
+            
+        }
     }
 
     static saveToLocalStorage(name: string) {

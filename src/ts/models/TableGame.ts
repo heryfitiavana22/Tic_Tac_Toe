@@ -17,7 +17,6 @@ class TableGame {
         this._dimensionX = x;
         this._dimensionY = y;
         this._checkWinning = new CheckWinning(x, y)
-        this.playersContainer()
     }
 
     init() {
@@ -43,7 +42,7 @@ class TableGame {
             casesHTML;
     }
 
-    playersContainer() {
+    renderPlayersContainer(nameHome?: any, nameAway?: any) {        
         let body = document.querySelector("body") as HTMLElement;
         body.insertAdjacentHTML(
             "beforeend", 
@@ -53,14 +52,16 @@ class TableGame {
                 <div class="current-player">
                     <span class="point circle"></span>
                 </div>
-                <div class="player">
-                    <span class="name player1">player 1 : 
+                <div class="player"> 
+                    <span class="name ${nameHome ? nameHome : "player1"}">
+                        ${nameHome ? nameHome : "player 1"} : 
                         <span class="score">0</span>
                     </span>
                     <span class="point circle"></span>
                 </div>
                 <div class="player">
-                    <span class="name player2">player 2 :
+                    <span class="name ${nameAway ? nameAway : "player2"}">
+                        ${nameAway ? nameAway : "player 2"} : 
                         <span class="score">0</span>
                     </span>
                     <span class="point croix"></span>
@@ -68,6 +69,7 @@ class TableGame {
             </div>
             `
         );
+        this._currentPlayerHTML = document.querySelector(".current-player") as HTMLElement;
     }
 
     createAdjacentMatrix() {

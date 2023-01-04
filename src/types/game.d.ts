@@ -12,7 +12,7 @@ declare class Point {
     _scoreHTML: HTMLElement;
     _namePlayer: string;
     pointHTML: string;
-    init(): void;
+    init(namePlayer?: string): void;
     reset(): void;
     win(): void;
 }
@@ -21,8 +21,9 @@ declare class User {
     name: string;
     place: string;
     currentRoom: string;
+    nameOpponent: string;
     getUSer(): string
-    isExist(): boolean
-    saveToLocalStorage(): void
+    static isExist(): boolean
+    static saveToLocalStorage(): void
 }
 

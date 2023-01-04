@@ -11,6 +11,7 @@ class LocalGame {
         this._croix = croix
         this._tableGame = tableGame
         this._tableGame.init()
+        this._tableGame.renderPlayersContainer()
         circle.init()
         croix.init()
         this.onClickCase()

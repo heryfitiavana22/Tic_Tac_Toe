@@ -810,6 +810,7 @@ var LocalGame = /** @class */ (function () {
         this._croix = croix;
         this._tableGame = tableGame;
         this._tableGame.init();
+        this._tableGame.renderPlayersContainer();
         circle.init();
         croix.init();
         this.onClickCase();
@@ -915,13 +916,14 @@ var OnlineGame = /** @class */ (function (_super) {
     }
     OnlineGame.prototype.onReady = function () {
         var _this = this;
-        this._socket.on("ready", function (home, away, room) {
+        this._socket.on("ready", function (nameHome, nameAway, room) {
             _this._user.currentRoom = room;
             // console.log("ready");
             // console.log(`${home} vs ${away} in ${room}`);
             _this._tableGame.init();
-            _this._circle.init();
-            _this._croix.init();
+            _this._tableGame.renderPlayersContainer(nameHome, nameAway);
+            _this._circle.init(nameHome);
+            _this._croix.init(nameAway);
         });
     };
     OnlineGame.prototype.onClickCase = function () {
@@ -986,8 +988,7 @@ var OnlineGame = /** @class */ (function (_super) {
                 return _this.setMessage("c'est votre adversaire qui peut clické");
             // si en ligne et "home" a clické
             if (_this._user.place === "home")
-                return _this.emitContinue();
-            _this._tableGame.reset(_this._circle, _this._croix);
+                return _this.emitReset();
         };
         btnContinue.onclick = function () {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
@@ -996,7 +997,6 @@ var OnlineGame = /** @class */ (function (_super) {
             // si en ligne et "home" a clické
             if (_this._user.place === "home")
                 return _this.emitContinue();
-            _this._tableGame.continue();
         };
     };
     OnlineGame.prototype.onReset = function () {
@@ -1215,12 +1215,14 @@ var Point = /** @class */ (function () {
         this.pointHTML = p;
         this._scoreHTML = document.querySelector(".".concat(this._namePlayer, " .score"));
     }
-    Point.prototype.init = function () {
+    Point.prototype.init = function (namePlayer) {
+        this._namePlayer = namePlayer ? namePlayer : this._namePlayer;
         this._scoreHTML = document.querySelector(".".concat(this._namePlayer, " .score"));
     };
     Point.prototype.reset = function () {
         this._score = 0;
         this._scoreHTML.innerHTML = this._score.toString();
+        console.log("reset");
     };
     Point.prototype.win = function () {
         this._score++;
@@ -1254,7 +1256,7 @@ var Socket = /** @class */ (function () {
         this.onWaitingOpponent();
         this.onNewOpponent();
         this.toActive();
-        this.setCurrentPoint(circle, croix);
+        this.setPlace();
     }
     Socket.prototype.emitStartGame = function () {
         this._user.getUSer();
@@ -1285,9 +1287,17 @@ var Socket = /** @class */ (function () {
             // handle click on opponent
             ul.onclick = function (e) {
                 var target = e.target, nameOpponent = target.innerHTML, _a = target.id.split(";"), idAway = _a[0], idRoom = _a[1], room = "room".concat(idRoom), animation = document.querySelector(".animation");
-                _this._socket.emit("to ready", room, _this._socket.id, idAway);
+                var home = {
+                    name: _this._user.name,
+                    id: _this._socket.id
+                }, away = {
+                    name: nameOpponent,
+                    id: idAway
+                };
+                _this._socket.emit("to ready", room, home, away);
                 // changer le "room" par le "room" de l'adversaire
                 _this._user.currentRoom = "room".concat(idRoom);
+                _this._user.nameOpponent = nameOpponent;
                 animation.classList.remove("loading");
             };
         });
@@ -1304,21 +1314,23 @@ var Socket = /** @class */ (function () {
         ul.innerHTML = listHTML;
         return ul;
     };
-    Socket.prototype.setCurrentPoint = function (circle, croix) {
+    Socket.prototype.setPlace = function () {
         var _this = this;
-        var currentPlayerHTML = document.querySelector(".current-player");
         this._socket.on("home", function () {
             // console.log("home");
             _this._user.place = "home";
             _this._isActive = true;
-            currentPlayerHTML.innerHTML = circle.pointHTML;
         });
         this._socket.on("away", function () {
             // console.log("away");
             _this._user.place = "away";
             _this._isActive = false;
-            currentPlayerHTML.innerHTML = croix.pointHTML;
         });
+    };
+    Socket.prototype.setPointOfPlayer = function (circle, croix) {
+        var currentPlayerHTML = document.querySelector(".current-player");
+        // currentPlayerHTML.innerHTML = circle.pointHTML;
+        // currentPlayerHTML.innerHTML = croix.pointHTML;
     };
     Socket.prototype.emitPoint = function (x, y) {
         this._socket.emit("set point", x, y, this._user.currentRoom);
@@ -1365,7 +1377,6 @@ var TableGame = /** @class */ (function () {
         this._dimensionX = x;
         this._dimensionY = y;
         this._checkWinning = new CheckWinning_1.default(x, y);
-        this.playersContainer();
     }
     TableGame.prototype.init = function () {
         this._isWinning = false;
@@ -1386,9 +1397,10 @@ var TableGame = /** @class */ (function () {
         document.querySelector(".container > div").innerHTML =
             casesHTML;
     };
-    TableGame.prototype.playersContainer = function () {
+    TableGame.prototype.renderPlayersContainer = function (nameHome, nameAway) {
         var body = document.querySelector("body");
-        body.insertAdjacentHTML("beforeend", "\n            <div class=\"players\">\n                <p class=\"message\">fd</p>\n                <div class=\"current-player\">\n                    <span class=\"point circle\"></span>\n                </div>\n                <div class=\"player\">\n                    <span class=\"name player1\">player 1 : \n                        <span class=\"score\">0</span>\n                    </span>\n                    <span class=\"point circle\"></span>\n                </div>\n                <div class=\"player\">\n                    <span class=\"name player2\">player 2 :\n                        <span class=\"score\">0</span>\n                    </span>\n                    <span class=\"point croix\"></span>\n                </div>\n            </div>\n            ");
+        body.insertAdjacentHTML("beforeend", "\n            <div class=\"players\">\n                <p class=\"message\">fd</p>\n                <div class=\"current-player\">\n                    <span class=\"point circle\"></span>\n                </div>\n                <div class=\"player\"> \n                    <span class=\"name ".concat(nameHome ? nameHome : "player1", "\">\n                        ").concat(nameHome ? nameHome : "player 1", " : \n                        <span class=\"score\">0</span>\n                    </span>\n                    <span class=\"point circle\"></span>\n                </div>\n                <div class=\"player\">\n                    <span class=\"name ").concat(nameAway ? nameAway : "player2", "\">\n                        ").concat(nameAway ? nameAway : "player 2", " : \n                        <span class=\"score\">0</span>\n                    </span>\n                    <span class=\"point croix\"></span>\n                </div>\n            </div>\n            "));
+        this._currentPlayerHTML = document.querySelector(".current-player");
     };
     TableGame.prototype.createAdjacentMatrix = function () {
         for (var i = 0; i < this._dimensionX; i++) {
@@ -1517,12 +1529,15 @@ var User = /** @class */ (function () {
         this.name = "";
         this.place = ""; // (home ou away)
         this.currentRoom = "";
+        this.nameOpponent = "";
     }
     User.prototype.getUSer = function () {
         this.name = localStorage.getItem("userTTT");
         return this.name;
     };
     User.prototype.showOpponent = function () {
+        if (this.place === "home") {
+        }
     };
     User.saveToLocalStorage = function (name) {
         localStorage.setItem('userTTT', name);

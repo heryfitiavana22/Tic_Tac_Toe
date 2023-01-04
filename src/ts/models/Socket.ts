@@ -12,7 +12,7 @@ class Socket {
         this.onWaitingOpponent();
         this.onNewOpponent()
         this.toActive();
-        this.setCurrentPoint(circle, croix);
+        this.setPlace();
     }
 
     emitStartGame() {   
@@ -62,9 +62,19 @@ class Socket {
                     room = `room${idRoom}`,
                     animation = document.querySelector(".animation") as HTMLDivElement;
 
-                this._socket.emit("to ready", room, this._socket.id, idAway);
+                let home = {
+                        name: this._user.name,
+                        id: this._socket.id
+                    },
+                    away = {
+                        name: nameOpponent,
+                        id: idAway
+                    };
+
+                this._socket.emit("to ready", room, home, away);
                 // changer le "room" par le "room" de l'adversaire
                 this._user.currentRoom = `room${idRoom}`;
+                this._user.nameOpponent = nameOpponent
                 animation.classList.remove("loading");
             };
             
@@ -87,22 +97,24 @@ class Socket {
         return ul
     }
 
-    setCurrentPoint(circle: Point, croix: Point) {
-        let currentPlayerHTML = document.querySelector(".current-player") as HTMLElement;
-
+    setPlace() {
         this._socket.on("home", () => {
             // console.log("home");
             this._user.place = "home";
             this._isActive = true;
-            currentPlayerHTML.innerHTML = circle.pointHTML;
         });
 
         this._socket.on("away", () => {
             // console.log("away");
             this._user.place = "away";
             this._isActive = false;
-            currentPlayerHTML.innerHTML = croix.pointHTML;
         });
+    }
+
+    setPointOfPlayer(circle: Point, croix: Point) {
+        let currentPlayerHTML = document.querySelector(".current-player") as HTMLElement;
+        // currentPlayerHTML.innerHTML = circle.pointHTML;
+        // currentPlayerHTML.innerHTML = croix.pointHTML;
     }
 
     emitPoint(x: number, y: number) {

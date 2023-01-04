@@ -35,7 +35,7 @@ class SocketIo {
                     isAvailable: true
                 });
                 
-                // trier afin d'optimiser le rercheche au living room (dans "to ready")
+                // trier afin d'optimiser le rercheche (dans "to ready")
                 this._listPlayer.sort((a, b) => (a.id as any) - (b.id as any));
                 // le socket courant rejoint un "room" et dans la liste qui attend des adversaires
                 socket.join("wait opponent");
@@ -47,31 +47,31 @@ class SocketIo {
                 // emettre la liste des adversaires disponible
                 this.emitNewOpponent()
 
-                socket.on("to ready", (room: string, idHome: string, idAway: string) => {
+                socket.on("to ready", (room: string, home: any, away: any) => {       
                     // faire rejoindre l' clické dans le "room"  
                     socket.join(room)
                     // leave the socket from "wait opponent"
                     this._listPlayer.forEach((e) => {
                         
-                        if (e.id === idHome) {
+                        if (e.id === home.id) {
                             e.socket.leave("wait opponent");
                             // changer le "room" et n"est plus disponible pour un autre adversaire
                             e.room = room
-                            e.idOpponent = idAway
+                            e.idOpponent = away.id
                             e.isAvailable = false
                             // mettre a jour les nouveaux adversaire possible
                             this.emitNewOpponent()
                         }
-                        if (e.id === idAway) {
+                        if (e.id === away.id) {
                             e.socket.leave("wait opponent");      
                             e.socket.emit("away")
-                            e.idOpponent = idHome
+                            e.idOpponent = home.id
                             e.isAvailable = false
                             // mettre a jour les nouveaux adversaire possible
                             this.emitNewOpponent()
                         }
                     });
-                    this._io.in(room).emit("ready", idHome, idAway, room);
+                    this._io.in(room).emit("ready", home.name, away.name, room);
                 });
                 this._currentRoom++;
             });
