@@ -1,25 +1,33 @@
-import Socket from "./models/socket"
-import TableGame from "./models/tableGame";
+import Socket from "../models/Socket"
+import TableGame from "../models/TableGame";
 
 class OnlineGame extends Socket {
     protected _tableGame: TableGame;
-    constructor(circle: Point, croix: Point) {
+    private _circle: Point;
+    private _croix: Point;
+
+    constructor(tableGame: TableGame, circle: Point, croix: Point) {
         super(circle, croix)
-        this._tableGame = new TableGame(3,3)
-        this.onDrawPoint(circle, croix);
+        this._circle = circle
+        this._croix = croix
+        this._tableGame = tableGame
+        this.onDrawPoint();
         this.onClickCase()
         this.onReady();
-        this.onReset(circle, croix);
+        this.onReset();
         this.onContinue();
         this.waitingForOpponent()
     }
 
     onReady() {
-        this._socket.on("ready", (home, away, room) => {
-            this._currentRoom = room;
+        this._socket.on("ready", (nameHome, nameAway, room) => {
+            this._user.currentRoom = room;
             // console.log("ready");
             // console.log(`${home} vs ${away} in ${room}`);
             this._tableGame.init();
+            this._tableGame.renderPlayersContainer(nameHome, nameAway)
+            this._circle.init(nameHome)
+            this._croix.init(nameAway)
         });
     }
 
@@ -49,70 +57,63 @@ class OnlineGame extends Socket {
         }; 
     }
 
-    onDrawPoint(
-        circle: Point,
-        croix: Point,
-    ) {
+    onDrawPoint() {
         this._socket.on("draw point", (x: number, y: number) => {
             this._tableGame.drawPoint(x, y);
             this._tableGame.pushCoords(x, y);
             this._tableGame.setIsWinning = this._tableGame.checkWinner();;
             // changement de joueur et verifier s'il a gagné
-            this.permutation(circle, croix);
+            this.permutation();
         });
     }
 
-    permutation(circle: Point, croix: Point) {
+    permutation() {
         // player 1 : circle; player 2: croix
         // change _currentPlayer and _currentPointHTML
         if (this._tableGame.getCurrentPlayer === 1) {
             this._tableGame.setCurrentPlayer = 2;
-            this._tableGame.setCurrentPointHTML = croix.pointHTML;
-            this._tableGame.setCurrentPlayerHTML = croix.pointHTML;
+            this._tableGame.setCurrentPointHTML = this._croix.pointHTML;
+            this._tableGame.setCurrentPlayerHTML = this._croix.pointHTML;
             // si gagnant
             if (this._tableGame.getIsWinning) {
-                circle.win();
-                this.btnResult(circle, croix);
+                this._circle.win();
+                this.btnResult();
             }
         } else {
             this._tableGame.setCurrentPlayer = 1;
-            this._tableGame.setCurrentPointHTML = circle.pointHTML;
-            this._tableGame.setCurrentPlayerHTML = circle.pointHTML;
+            this._tableGame.setCurrentPointHTML = this._circle.pointHTML;
+            this._tableGame.setCurrentPlayerHTML = this._circle.pointHTML;
             // si gagnant
             if (this._tableGame.getIsWinning) {
-                croix.win();
-                this.btnResult(circle, croix);
+                this._croix.win();
+                this.btnResult();
             }
         }
     }
 
-    btnResult(circle: Point, croix: Point) {
+    btnResult() {
         let btnReset = document.querySelector("button.reset") as HTMLButtonElement,
             btnContinue = document.querySelector("button.continue") as HTMLButtonElement;
 
         btnReset.onclick = () => {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
-            if (this._place === "away") return this.setMessage("c'est votre adversaire qui peut clické")
+            if (this._user.place === "away") return this.setMessage("c'est votre adversaire qui peut clické")
             // si en ligne et "home" a clické
-            if(this._place === "home") return this.emitContinue()
-
-            this._tableGame.reset(circle, croix);
+            if(this._user.place === "home") return this.emitReset();
         };
 
         btnContinue.onclick = () => {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
-            if (this._place === "away") return this.setMessage("c'est votre adversaire qui peut clické")
+            if (this._user.place === "away") return this.setMessage("c'est votre adversaire qui peut clické")
             // si en ligne et "home" a clické
-            if(this._place === "home") return this.emitContinue()
-
-            this._tableGame.continue();
+            if(this._user.place === "home") return this.emitContinue()
         };
     }
 
-    onReset(circle: Point, croix: Point) {
+    onReset() {
         this._socket.on("reset", () => {
-            this._tableGame.reset(circle, croix);
-            if (this._place === "home") {
+            this._tableGame.reset(this._circle, this._croix);
+            if (this._user.place === "home") {
                 this._isActive = true;
                 return;
             }
