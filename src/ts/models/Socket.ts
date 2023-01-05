@@ -46,6 +46,12 @@ class Socket {
         `;
         let animation = document.querySelector(".animation") as HTMLDivElement;
         animation.classList.add("loading")
+        // eviter un bug
+        let resultHTML = document.querySelector(".result") as HTMLDivElement,
+            playerContainer = document.querySelector(".players") as HTMLElement;
+        resultHTML.style.transform = "scale(0)";
+        resultHTML.innerHTML = ""
+        playerContainer.innerHTML = ""        
     }
 
     onNewOpponent() {
@@ -109,12 +115,6 @@ class Socket {
             this._user.place = "away";
             this._isActive = false;
         });
-    }
-
-    setPointOfPlayer(circle: Point, croix: Point) {
-        let currentPlayerHTML = document.querySelector(".current-player") as HTMLElement;
-        // currentPlayerHTML.innerHTML = circle.pointHTML;
-        // currentPlayerHTML.innerHTML = croix.pointHTML;
     }
 
     emitPoint(x: number, y: number) {

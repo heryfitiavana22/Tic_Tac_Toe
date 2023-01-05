@@ -95,14 +95,14 @@ class OnlineGame extends Socket {
 
         btnReset.onclick = () => {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
-            if (this._user.place === "away") return this.setMessage("c'est votre adversaire qui peut clické")
+            if (this._user.place === "away") return this.setMessage("player1 can click")
             // si en ligne et "home" a clické
             if(this._user.place === "home") return this.emitReset();
         };
 
         btnContinue.onclick = () => {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
-            if (this._user.place === "away") return this.setMessage("c'est votre adversaire qui peut clické")
+            if (this._user.place === "away") return this.setMessage("player1 can click")
             // si en ligne et "home" a clické
             if(this._user.place === "home") return this.emitContinue()
         };

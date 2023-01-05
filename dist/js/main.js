@@ -983,7 +983,7 @@ var OnlineGame = /** @class */ (function (_super) {
         btnReset.onclick = function () {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
             if (_this._user.place === "away")
-                return _this.setMessage("c'est votre adversaire qui peut clické");
+                return _this.setMessage("player1 can click");
             // si en ligne et "home" a clické
             if (_this._user.place === "home")
                 return _this.emitReset();
@@ -991,7 +991,7 @@ var OnlineGame = /** @class */ (function (_super) {
         btnContinue.onclick = function () {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
             if (_this._user.place === "away")
-                return _this.setMessage("c'est votre adversaire qui peut clické");
+                return _this.setMessage("player1 can click");
             // si en ligne et "home" a clické
             if (_this._user.place === "home")
                 return _this.emitContinue();
@@ -1273,6 +1273,11 @@ var Socket = /** @class */ (function () {
         container.innerHTML = "\n            <h2>Available opponent :</h2>\n            <ul class=\"list-opponent\">\n                \n            </ul>\n            <div class=\"animation\">\n                <div class=\"bar b1 odd\"></div>\n                <div class=\"bar b2 even\"></div>\n                <div class=\"bar b3 odd\"></div>\n                <div class=\"bar b4 even\"></div>\n            </div>\n        ";
         var animation = document.querySelector(".animation");
         animation.classList.add("loading");
+        // eviter un bug
+        var resultHTML = document.querySelector(".result"), playerContainer = document.querySelector(".players");
+        resultHTML.style.transform = "scale(0)";
+        resultHTML.innerHTML = "";
+        playerContainer.innerHTML = "";
     };
     Socket.prototype.onNewOpponent = function () {
         var _this = this;
@@ -1322,11 +1327,6 @@ var Socket = /** @class */ (function () {
             _this._user.place = "away";
             _this._isActive = false;
         });
-    };
-    Socket.prototype.setPointOfPlayer = function (circle, croix) {
-        var currentPlayerHTML = document.querySelector(".current-player");
-        // currentPlayerHTML.innerHTML = circle.pointHTML;
-        // currentPlayerHTML.innerHTML = croix.pointHTML;
     };
     Socket.prototype.emitPoint = function (x, y) {
         this._socket.emit("set point", x, y, this._user.currentRoom);
@@ -1394,8 +1394,8 @@ var TableGame = /** @class */ (function () {
             casesHTML;
     };
     TableGame.prototype.renderPlayersContainer = function (nameHome, nameAway) {
-        var body = document.querySelector("body");
-        body.insertAdjacentHTML("beforeend", "\n            <div class=\"players\">\n                <p class=\"message\">fd</p>\n                <div class=\"current-player\">\n                    <span class=\"point circle\"></span>\n                </div>\n                <div class=\"player\"> \n                    <span class=\"name player1\"}\">\n                        ".concat(nameHome ? nameHome : "player 1", " : \n                        <span class=\"score\">0</span>\n                    </span>\n                    <span class=\"point circle\"></span>\n                </div>\n                <div class=\"player\">\n                    <span class=\"name player2\"}\">\n                        ").concat(nameAway ? nameAway : "player 2", " : \n                        <span class=\"score\">0</span>\n                    </span>\n                    <span class=\"point croix\"></span>\n                </div>\n            </div>\n            "));
+        var playerContainer = document.querySelector(".players");
+        playerContainer.innerHTML = "\n            <div class=\"players\">\n                <p class=\"message\">fd</p>\n                <div class=\"current-player\">\n                    <span class=\"point circle\"></span>\n                </div>\n                <div class=\"player\"> \n                    <span class=\"name player1\"}\">\n                        ".concat(nameHome ? nameHome : "player 1", " : \n                        <span class=\"score\">0</span>\n                    </span>\n                    <span class=\"point circle\"></span>\n                </div>\n                <div class=\"player\">\n                    <span class=\"name player2\"}\">\n                        ").concat(nameAway ? nameAway : "player 2", " : \n                        <span class=\"score\">0</span>\n                    </span>\n                    <span class=\"point croix\"></span>\n                </div>\n            </div>\n        ");
         this._currentPlayerHTML = document.querySelector(".current-player");
     };
     TableGame.prototype.createAdjacentMatrix = function () {
@@ -1417,7 +1417,8 @@ var TableGame = /** @class */ (function () {
         // attendre pour afficher un peu la ligne
         setTimeout(function () {
             resultHTML.style.transform = "scale(1)";
-        }, 500);
+            console.log("scale(1)");
+        }, 50);
     };
     Object.defineProperty(TableGame.prototype, "getIsWinning", {
         get: function () {

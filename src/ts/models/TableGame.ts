@@ -43,10 +43,8 @@ class TableGame {
     }
 
     renderPlayersContainer(nameHome?: string, nameAway?: string) {        
-        let body = document.querySelector("body") as HTMLElement;
-        body.insertAdjacentHTML(
-            "beforeend", 
-            `
+        let playerContainer = document.querySelector(".players") as HTMLElement;
+        playerContainer.innerHTML = `
             <div class="players">
                 <p class="message">fd</p>
                 <div class="current-player">
@@ -67,8 +65,7 @@ class TableGame {
                     <span class="point croix"></span>
                 </div>
             </div>
-            `
-        );
+        `
         this._currentPlayerHTML = document.querySelector(".current-player") as HTMLElement;
     }
 
@@ -102,7 +99,8 @@ class TableGame {
         // attendre pour afficher un peu la ligne
         setTimeout(() => {
             resultHTML.style.transform = "scale(1)";
-        }, 500);
+            console.log("scale(1)");
+        }, 50);
     }
 
     get getIsWinning(): boolean {
