@@ -10,15 +10,15 @@ class Point {
     }
     
     init(namePlayer?: string) {
-        this._namePlayer = namePlayer ? namePlayer : this._namePlayer
+        // this._namePlayer = namePlayer ? namePlayer : this._namePlayer
         this._scoreHTML = document.querySelector(`.${this._namePlayer} .score`) as HTMLSpanElement
+        console.log(this._scoreHTML);
+        
     }
 
     reset() {
         this._score = 0
         this._scoreHTML.innerHTML = this._score.toString()
-        console.log("reset");
-        
     }
 
     win() {

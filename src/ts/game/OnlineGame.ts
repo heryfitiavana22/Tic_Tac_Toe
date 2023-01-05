@@ -26,6 +26,9 @@ class OnlineGame extends Socket {
             // console.log(`${home} vs ${away} in ${room}`);
             this._tableGame.init();
             this._tableGame.renderPlayersContainer(nameHome, nameAway)
+            console.log(nameHome);
+            console.log(nameAway);
+            
             this._circle.init(nameHome)
             this._croix.init(nameAway)
         });

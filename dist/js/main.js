@@ -922,6 +922,8 @@ var OnlineGame = /** @class */ (function (_super) {
             // console.log(`${home} vs ${away} in ${room}`);
             _this._tableGame.init();
             _this._tableGame.renderPlayersContainer(nameHome, nameAway);
+            console.log(nameHome);
+            console.log(nameAway);
             _this._circle.init(nameHome);
             _this._croix.init(nameAway);
         });
@@ -1216,13 +1218,13 @@ var Point = /** @class */ (function () {
         this._scoreHTML = document.querySelector(".".concat(this._namePlayer, " .score"));
     }
     Point.prototype.init = function (namePlayer) {
-        this._namePlayer = namePlayer ? namePlayer : this._namePlayer;
+        // this._namePlayer = namePlayer ? namePlayer : this._namePlayer
         this._scoreHTML = document.querySelector(".".concat(this._namePlayer, " .score"));
+        console.log(this._scoreHTML);
     };
     Point.prototype.reset = function () {
         this._score = 0;
         this._scoreHTML.innerHTML = this._score.toString();
-        console.log("reset");
     };
     Point.prototype.win = function () {
         this._score++;
@@ -1399,7 +1401,7 @@ var TableGame = /** @class */ (function () {
     };
     TableGame.prototype.renderPlayersContainer = function (nameHome, nameAway) {
         var body = document.querySelector("body");
-        body.insertAdjacentHTML("beforeend", "\n            <div class=\"players\">\n                <p class=\"message\">fd</p>\n                <div class=\"current-player\">\n                    <span class=\"point circle\"></span>\n                </div>\n                <div class=\"player\"> \n                    <span class=\"name ".concat(nameHome ? nameHome : "player1", "\">\n                        ").concat(nameHome ? nameHome : "player 1", " : \n                        <span class=\"score\">0</span>\n                    </span>\n                    <span class=\"point circle\"></span>\n                </div>\n                <div class=\"player\">\n                    <span class=\"name ").concat(nameAway ? nameAway : "player2", "\">\n                        ").concat(nameAway ? nameAway : "player 2", " : \n                        <span class=\"score\">0</span>\n                    </span>\n                    <span class=\"point croix\"></span>\n                </div>\n            </div>\n            "));
+        body.insertAdjacentHTML("beforeend", "\n            <div class=\"players\">\n                <p class=\"message\">fd</p>\n                <div class=\"current-player\">\n                    <span class=\"point circle\"></span>\n                </div>\n                <div class=\"player\"> \n                    <span class=\"name player1\"}\">\n                        ".concat(nameHome ? nameHome : "player 1", " : \n                        <span class=\"score\">0</span>\n                    </span>\n                    <span class=\"point circle\"></span>\n                </div>\n                <div class=\"player\">\n                    <span class=\"name player2\"}\">\n                        ").concat(nameAway ? nameAway : "player 2", " : \n                        <span class=\"score\">0</span>\n                    </span>\n                    <span class=\"point croix\"></span>\n                </div>\n            </div>\n            "));
         this._currentPlayerHTML = document.querySelector(".current-player");
     };
     TableGame.prototype.createAdjacentMatrix = function () {
