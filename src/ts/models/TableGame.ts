@@ -42,7 +42,7 @@ class TableGame {
             casesHTML;
     }
 
-    renderPlayersContainer(nameHome?: any, nameAway?: any) {        
+    renderPlayersContainer(nameHome?: string, nameAway?: string) {        
         let body = document.querySelector("body") as HTMLElement;
         body.insertAdjacentHTML(
             "beforeend", 
@@ -53,14 +53,14 @@ class TableGame {
                     <span class="point circle"></span>
                 </div>
                 <div class="player"> 
-                    <span class="name ${nameHome ? nameHome : "player1"}">
+                    <span class="name player1"}">
                         ${nameHome ? nameHome : "player 1"} : 
                         <span class="score">0</span>
                     </span>
                     <span class="point circle"></span>
                 </div>
                 <div class="player">
-                    <span class="name ${nameAway ? nameAway : "player2"}">
+                    <span class="name player2"}">
                         ${nameAway ? nameAway : "player 2"} : 
                         <span class="score">0</span>
                     </span>

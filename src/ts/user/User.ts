@@ -9,12 +9,6 @@ class User {
         return this.name
     }
 
-    showOpponent() {
-        if(this.place === "home") {
-            
-        }
-    }
-
     static saveToLocalStorage(name: string) {
         localStorage.setItem('userTTT', name)
     }

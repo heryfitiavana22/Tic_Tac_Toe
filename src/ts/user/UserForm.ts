@@ -6,9 +6,9 @@ class UserForm {
         let container = document.querySelector(".container  > div") as HTMLDivElement;
         container.className = "user-form"
         container.innerHTML = `
-            <p>Entrer votre nom :</p>
-            <input type="text" name="name" id="name">
-            <button class="">Enregistrer</button>
+            <p>Username :</p>
+            <input type="text" name="name" id="name" placeholder="username">
+            <button class="btn">Enregistrer</button>
         `
         this.handleButton()
     }

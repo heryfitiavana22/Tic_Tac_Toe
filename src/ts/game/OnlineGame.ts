@@ -7,7 +7,7 @@ class OnlineGame extends Socket {
     private _croix: Point;
 
     constructor(tableGame: TableGame, circle: Point, croix: Point) {
-        super(circle, croix)
+        super()
         this._circle = circle
         this._croix = croix
         this._tableGame = tableGame
@@ -22,12 +22,10 @@ class OnlineGame extends Socket {
     onReady() {
         this._socket.on("ready", (nameHome, nameAway, room) => {
             this._user.currentRoom = room;
-            // console.log("ready");
-            // console.log(`${home} vs ${away} in ${room}`);
             this._tableGame.init();
-            this._tableGame.renderPlayersContainer(nameHome, nameAway)
-            this._circle.init(nameHome)
-            this._croix.init(nameAway)
+            this._tableGame.renderPlayersContainer(nameHome, nameAway)            
+            this._circle.init()
+            this._croix.init()
         });
     }
 
@@ -47,7 +45,7 @@ class OnlineGame extends Socket {
                 return;
 
             // et si on est autorisé de clické (si en ligne)
-            if(!this._isActive) return this.setMessage("C'est le tour de votre adversaire")
+            if(!this._isActive) return this.setMessage("it's your opponent's turn")
             
                 
             // on draw point        

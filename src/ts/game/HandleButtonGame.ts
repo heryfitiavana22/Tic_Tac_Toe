@@ -20,10 +20,10 @@ class HandleButtonGame {
 
     render() {
         let container = document.querySelector(".container  > div") as HTMLDivElement;
-        container.className = "";
+        container.className = "choice-game";
         container.innerHTML = `
-            <button class="" id="local">jouer en local</button>
-            <button class="" id="online">jouer en ligne</button>
+            <button class="btn" id="local">Local</button>
+            <button class="btn" id="online">Online</button>
         `;
         this.handleButton()
         
