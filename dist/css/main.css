@@ -38,10 +38,15 @@ body {
     overflow-x: hidden;
     overflow-y: scroll;
 }
-.user-form {
+.user-form, .choice-game {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
     background-color: #212121;
 }
 
+/* table game */
 .case {
     position: relative;
     display: flex;
@@ -50,7 +55,6 @@ body {
     background-color: #121212;
     cursor: pointer;
 }
-
 
 .point {
     position: absolute;
@@ -140,7 +144,6 @@ body {
     display: block;
     font-size: 20px;
     margin-bottom: 10px;
-    /* font-weight: bolder; */
 }
 .player .score {font-weight: bold;}
 .player .point {
@@ -150,14 +153,14 @@ body {
     display: inline-block;
 }
 
+/* result */
 .result {
     position: absolute;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    width: 30%;
-    height: 30%;
+    padding: 60px;
     background-color: #1d1d1d;
     border: 1px solid rgb(78, 78, 78);
     transform: scale(0);
@@ -220,12 +223,14 @@ h2 {
     color: rgb(222, 222, 222);
 }
 
+/* username */
 .user-form p {
     margin: 0;
     font-size: 18px;
 }
 .user-form input {
-    height: 25px;
+    width: 200px;
+    height: 35px;
     margin-top: 10px;
     background-color: #575757;
     border-radius: 4px;
@@ -234,16 +239,31 @@ h2 {
 }
 .user-form input:focus-visible {outline: none;}
 .user-form button {
+    margin: 10px 0;
+    padding: 8px 10px;
+}
+
+.btn {
+    font-size: 16px;
+    border-radius: 6px;
     color: rgb(218, 218, 218);
-    background-color: black;
-    border: 1px solid black;
+    background-color: rgb(88, 88, 88);
+    border: 1px solid rgb(88, 88, 88);
     cursor: pointer;
     transition: all 0.3s ease;
 }
-.user-form button:hover {
-    background-color: rgb(56, 56, 56);
+.btn:hover {
+    background-color: rgb(77, 77, 77);
+    border: 1px solid rgb(77, 77, 77);
 }
 
+/* choice game (local or online) */
+.choice-game button {
+    margin: 10px 0;
+    padding: 15px 70px;
+}
+
+/* animation */
 .animation {
     position: absolute;
     width: 100%;

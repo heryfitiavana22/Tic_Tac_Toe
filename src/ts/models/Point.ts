@@ -9,11 +9,8 @@ class Point {
         this._scoreHTML = document.querySelector(`.${this._namePlayer} .score`) as HTMLSpanElement
     }
     
-    init(namePlayer?: string) {
-        // this._namePlayer = namePlayer ? namePlayer : this._namePlayer
+    init() {
         this._scoreHTML = document.querySelector(`.${this._namePlayer} .score`) as HTMLSpanElement
-        console.log(this._scoreHTML);
-        
     }
 
     reset() {

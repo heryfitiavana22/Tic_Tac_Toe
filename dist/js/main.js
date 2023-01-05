@@ -772,8 +772,8 @@ var HandleButtonGame = /** @class */ (function () {
     }
     HandleButtonGame.prototype.render = function () {
         var container = document.querySelector(".container  > div");
-        container.className = "";
-        container.innerHTML = "\n            <button class=\"\" id=\"local\">jouer en local</button>\n            <button class=\"\" id=\"online\">jouer en ligne</button>\n        ";
+        container.className = "choice-game";
+        container.innerHTML = "\n            <button class=\"btn\" id=\"local\">Local</button>\n            <button class=\"btn\" id=\"online\">Online</button>\n        ";
         this.handleButton();
     };
     HandleButtonGame.prototype.handleButton = function () {
@@ -902,7 +902,7 @@ var Socket_1 = __webpack_require__(/*! ../models/Socket */ "./src/ts/models/Sock
 var OnlineGame = /** @class */ (function (_super) {
     __extends(OnlineGame, _super);
     function OnlineGame(tableGame, circle, croix) {
-        var _this = _super.call(this, circle, croix) || this;
+        var _this = _super.call(this) || this;
         _this._circle = circle;
         _this._croix = croix;
         _this._tableGame = tableGame;
@@ -918,14 +918,10 @@ var OnlineGame = /** @class */ (function (_super) {
         var _this = this;
         this._socket.on("ready", function (nameHome, nameAway, room) {
             _this._user.currentRoom = room;
-            // console.log("ready");
-            // console.log(`${home} vs ${away} in ${room}`);
             _this._tableGame.init();
             _this._tableGame.renderPlayersContainer(nameHome, nameAway);
-            console.log(nameHome);
-            console.log(nameAway);
-            _this._circle.init(nameHome);
-            _this._croix.init(nameAway);
+            _this._circle.init();
+            _this._croix.init();
         });
     };
     OnlineGame.prototype.onClickCase = function () {
@@ -939,7 +935,7 @@ var OnlineGame = /** @class */ (function (_super) {
                 return;
             // et si on est autorisé de clické (si en ligne)
             if (!_this._isActive)
-                return _this.setMessage("C'est le tour de votre adversaire");
+                return _this.setMessage("it's your opponent's turn");
             // on draw point        
             _this.emitPoint(x, y);
             // mettre le joueur qui a clické en "non active" (tour de l'adversaire)
@@ -1217,10 +1213,8 @@ var Point = /** @class */ (function () {
         this.pointHTML = p;
         this._scoreHTML = document.querySelector(".".concat(this._namePlayer, " .score"));
     }
-    Point.prototype.init = function (namePlayer) {
-        // this._namePlayer = namePlayer ? namePlayer : this._namePlayer
+    Point.prototype.init = function () {
         this._scoreHTML = document.querySelector(".".concat(this._namePlayer, " .score"));
-        console.log(this._scoreHTML);
     };
     Point.prototype.reset = function () {
         this._score = 0;
@@ -1249,7 +1243,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 var socket_io_client_1 = __webpack_require__(/*! socket.io-client */ "./node_modules/.pnpm/socket.io-client@4.5.4/node_modules/socket.io-client/build/cjs/index.js");
 var User_1 = __webpack_require__(/*! ../user/User */ "./src/ts/user/User.ts");
 var Socket = /** @class */ (function () {
-    function Socket(circle, croix) {
+    function Socket() {
         this._isActive = false;
         this._socket = (0, socket_io_client_1.io)();
         this._user = new User_1.default();
@@ -1537,10 +1531,6 @@ var User = /** @class */ (function () {
         this.name = localStorage.getItem("userTTT");
         return this.name;
     };
-    User.prototype.showOpponent = function () {
-        if (this.place === "home") {
-        }
-    };
     User.saveToLocalStorage = function (name) {
         localStorage.setItem('userTTT', name);
     };
@@ -1571,7 +1561,7 @@ var UserForm = /** @class */ (function () {
     UserForm.prototype.render = function () {
         var container = document.querySelector(".container  > div");
         container.className = "user-form";
-        container.innerHTML = "\n            <p>Entrer votre nom :</p>\n            <input type=\"text\" name=\"name\" id=\"name\">\n            <button class=\"\">Enregistrer</button>\n        ";
+        container.innerHTML = "\n            <p>Username :</p>\n            <input type=\"text\" name=\"name\" id=\"name\" placeholder=\"username\">\n            <button class=\"btn\">Enregistrer</button>\n        ";
         this.handleButton();
     };
     UserForm.prototype.handleButton = function () {

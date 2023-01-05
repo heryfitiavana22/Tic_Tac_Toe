@@ -7,7 +7,7 @@ class Socket {
     protected _user = new User();
     protected _container = document.querySelector(".container  > div") as HTMLDivElement;
 
-    constructor(circle: Point, croix: Point) {
+    constructor() {
         this.emitStartGame();
         this.onWaitingOpponent();
         this.onNewOpponent()
