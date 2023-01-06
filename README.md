@@ -16,7 +16,8 @@ git clone https://github.com/heryfitiavana22/Tic_Tac_Toe.git
 Install dependency
 ```
 npm install
-``` or 
+```
+ or 
 ```
 pnpm install
 ```
