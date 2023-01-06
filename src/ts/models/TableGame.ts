@@ -3,6 +3,7 @@ import CheckWinning from "../lib/CheckWinning"
 class TableGame {
     private _currentPlayer = 1;
     private _isWinning = false;
+    private _isDraw = false;
     // dimension
     private _dimensionX: number;
     private _dimensionY: number;
@@ -21,6 +22,7 @@ class TableGame {
 
     init() {
         this._isWinning = false;
+        this._isDraw = false
         this._adjacentMatrix = [];
         this.createAdjacentMatrix();
         this.drawTable();
@@ -99,7 +101,6 @@ class TableGame {
         // attendre pour afficher un peu la ligne
         setTimeout(() => {
             resultHTML.style.transform = "scale(1)";
-            console.log("scale(1)");
         }, 50);
     }
 
@@ -109,6 +110,10 @@ class TableGame {
 
     set setIsWinning(value: boolean) {
         this._isWinning = value
+    }
+
+    get getIsDraw(): boolean {
+        return this._isDraw
     }
 
     checkWinner() {
@@ -130,8 +135,9 @@ class TableGame {
         }
     
         if(this._checkWinning.checkDraw()) {
+            this._isDraw = true
             this.showResult(true)
-            return true
+            return false
         }
         return false
     }

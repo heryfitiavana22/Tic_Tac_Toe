@@ -53,6 +53,8 @@ class LocalGame {
             // si gagnant
             if (this._tableGame.getIsWinning) {
                 this._circle.win();
+            }
+            if (this._tableGame.getIsWinning || this._tableGame.getIsDraw) {
                 this.btnResult();
             }
         } else {
@@ -62,6 +64,8 @@ class LocalGame {
             // si gagnant
             if (this._tableGame.getIsWinning) {
                 this._croix.win();
+            }
+            if (this._tableGame.getIsWinning || this._tableGame.getIsDraw) {
                 this.btnResult();
             }
         }

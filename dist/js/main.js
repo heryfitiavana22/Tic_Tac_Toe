@@ -843,6 +843,8 @@ var LocalGame = /** @class */ (function () {
             // si gagnant
             if (this._tableGame.getIsWinning) {
                 this._circle.win();
+            }
+            if (this._tableGame.getIsWinning || this._tableGame.getIsDraw) {
                 this.btnResult();
             }
         }
@@ -853,6 +855,8 @@ var LocalGame = /** @class */ (function () {
             // si gagnant
             if (this._tableGame.getIsWinning) {
                 this._croix.win();
+            }
+            if (this._tableGame.getIsWinning || this._tableGame.getIsDraw) {
                 this.btnResult();
             }
         }
@@ -963,6 +967,8 @@ var OnlineGame = /** @class */ (function (_super) {
             // si gagnant
             if (this._tableGame.getIsWinning) {
                 this._circle.win();
+            }
+            if (this._tableGame.getIsWinning || this._tableGame.getIsDraw) {
                 this.btnResult();
             }
         }
@@ -973,6 +979,8 @@ var OnlineGame = /** @class */ (function (_super) {
             // si gagnant
             if (this._tableGame.getIsWinning) {
                 this._croix.win();
+            }
+            if (this._tableGame.getIsWinning || this._tableGame.getIsDraw) {
                 this.btnResult();
             }
         }
@@ -983,7 +991,7 @@ var OnlineGame = /** @class */ (function (_super) {
         btnReset.onclick = function () {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
             if (_this._user.place === "away")
-                return _this.setMessage("player1 can click");
+                return _this.setMessage("c'est votre adversaire qui peut clické");
             // si en ligne et "home" a clické
             if (_this._user.place === "home")
                 return _this.emitReset();
@@ -991,7 +999,7 @@ var OnlineGame = /** @class */ (function (_super) {
         btnContinue.onclick = function () {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
             if (_this._user.place === "away")
-                return _this.setMessage("player1 can click");
+                return _this.setMessage("c'est votre adversaire qui peut clické");
             // si en ligne et "home" a clické
             if (_this._user.place === "home")
                 return _this.emitContinue();
@@ -1365,6 +1373,7 @@ var TableGame = /** @class */ (function () {
     function TableGame(x, y) {
         this._currentPlayer = 1;
         this._isWinning = false;
+        this._isDraw = false;
         // currentPoint: Point = circle;
         this._currentPointHTML = '<span class="point circle"></span>';
         this._currentPlayerHTML = document.querySelector(".current-player");
@@ -1376,6 +1385,7 @@ var TableGame = /** @class */ (function () {
     }
     TableGame.prototype.init = function () {
         this._isWinning = false;
+        this._isDraw = false;
         this._adjacentMatrix = [];
         this.createAdjacentMatrix();
         this.drawTable();
@@ -1434,6 +1444,13 @@ var TableGame = /** @class */ (function () {
         enumerable: false,
         configurable: true
     });
+    Object.defineProperty(TableGame.prototype, "getIsDraw", {
+        get: function () {
+            return this._isDraw;
+        },
+        enumerable: false,
+        configurable: true
+    });
     TableGame.prototype.checkWinner = function () {
         this._checkWinning.setAdjacentMatrix = this._adjacentMatrix;
         this._checkWinning.setCurrentPlayer = this._currentPlayer;
@@ -1448,8 +1465,9 @@ var TableGame = /** @class */ (function () {
             return true;
         }
         if (this._checkWinning.checkDraw()) {
+            this._isDraw = true;
             this.showResult(true);
-            return true;
+            return false;
         }
         return false;
     };
