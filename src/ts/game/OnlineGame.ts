@@ -75,6 +75,8 @@ class OnlineGame extends Socket {
             // si gagnant
             if (this._tableGame.getIsWinning) {
                 this._circle.win();
+            }
+            if (this._tableGame.getIsWinning || this._tableGame.getIsDraw) {
                 this.btnResult();
             }
         } else {
@@ -84,6 +86,8 @@ class OnlineGame extends Socket {
             // si gagnant
             if (this._tableGame.getIsWinning) {
                 this._croix.win();
+            }
+            if (this._tableGame.getIsWinning || this._tableGame.getIsDraw) {
                 this.btnResult();
             }
         }
@@ -95,14 +99,14 @@ class OnlineGame extends Socket {
 
         btnReset.onclick = () => {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
-            if (this._user.place === "away") return this.setMessage("player1 can click")
+            if (this._user.place === "away") return this.setMessage("c'est votre adversaire qui peut clické")
             // si en ligne et "home" a clické
             if(this._user.place === "home") return this.emitReset();
         };
 
         btnContinue.onclick = () => {
             // seul "home" qui peut clické sur "reset" ou "continue" (si en ligne)
-            if (this._user.place === "away") return this.setMessage("player1 can click")
+            if (this._user.place === "away") return this.setMessage("c'est votre adversaire qui peut clické")
             // si en ligne et "home" a clické
             if(this._user.place === "home") return this.emitContinue()
         };
