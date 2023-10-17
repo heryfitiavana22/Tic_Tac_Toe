@@ -1,6 +1,10 @@
 # Tic Tac Toe
 Link : https://tic-tac-toe-4ufj.onrender.com/
 
+## Screenshots
+
+![App Screenshot](./screenshoot.gif)
+
 ## Features
 **we can** :
 - play locally
